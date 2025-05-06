@@ -22,7 +22,6 @@ export const fetchUserProfile = async (
   
   const userData = response.data.result[0];
   const isCurrentUser = currentUserId === userId;
-  console.log(userData);
 
   return {
     success: true,
