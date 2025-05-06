@@ -222,12 +222,12 @@ const getCurrentLocation = (): Promise<{ latitude: number; longitude: number } |
       },
       (error) => {
         console.warn(`Error getting location: ${error.message}`);
-        resolve(null); // Resolve with null on error (permission denied, unavailable, etc.)
+        resolve(null);
       },
       {
-        enableHighAccuracy: false, // Lower accuracy is often faster and sufficient
-        timeout: 5000, // 5 seconds timeout
-        maximumAge: 60000, // Accept cached position up to 1 minute old
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 60000,
       }
     );
   });
