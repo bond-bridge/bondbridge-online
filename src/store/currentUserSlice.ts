@@ -13,6 +13,7 @@ interface CurrentUserState {
   userId: string;
   public: number;
   referralCode: string;
+  referralCount: number;
 }
 
 const initialState: CurrentUserState = {
@@ -28,6 +29,7 @@ const initialState: CurrentUserState = {
   userId: "",
   public: 0,
   referralCode: "",
+  referralCount: 0,
 };
 
 const currentUserSlice = createSlice({

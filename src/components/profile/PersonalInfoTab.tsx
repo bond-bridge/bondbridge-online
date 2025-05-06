@@ -193,7 +193,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({ onValidationChange })
             id="dob"
             value={dateOfBirth}
             onChange={handleChange}
-            className="date-input"
+            className="date-input text-foreground"
           />
           {ageError && (
             <div className="mt-2 text-foreground text-sm">{ageError}</div>

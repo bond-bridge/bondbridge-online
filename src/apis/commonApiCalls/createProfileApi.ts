@@ -28,6 +28,7 @@ export const submitProfile = async (profileData: CreateProfileRequest): Promise<
   formData.append('name', name);
   formData.append('email', email);
   formData.append('referralCode', referralCode || "");
+  formData.append('privacyLevel', "0");
 
   // commented out as not being uploaded currently
   formData.append('dob', dateOfBirth);

@@ -18,6 +18,7 @@ export interface UserProfileData {
   public?: number;
   isBlocked: boolean;
   referralCode?: string;
+  referralCount?: number;
 }
 
 export interface PostData {

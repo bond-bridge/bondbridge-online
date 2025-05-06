@@ -29,7 +29,7 @@ const Settings = () => {
   const [searchParams] = useSearchParams();
 
   // Get user data from Redux store
-  const { username, email, avatar, privacyLevel, profilePic, referralCode } =
+  const { username, email, avatar, privacyLevel, profilePic, referralCode, referralCount } =
     useAppSelector((state) => state.currentUser);
 
   const handleCopy = (text: string) => {
@@ -82,6 +82,8 @@ const Settings = () => {
               bio: result.data.bio,
               interests: result.data.interests,
               public: result.data.public,
+              referralCode: result.data.referralCode,
+              referralCount: result.data.referralCount,
             })
           );
         }
@@ -111,6 +113,7 @@ const Settings = () => {
                 interests: result.data.interests,
                 public: result.data.public,
                 referralCode: result.data.referralCode,
+                referralCount: result.data.referralCount,
               })
             );
           }
@@ -168,7 +171,7 @@ const Settings = () => {
       </div>
 
       {/* Profile Section */}
-      {isLoading  ? (
+      {isLoading ? (
         <div className="p-4 flex items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
@@ -182,7 +185,7 @@ const Settings = () => {
             <AvatarFallback>{username?.substring(0, 2) || "U"}</AvatarFallback>
           </Avatar>
 
-          <div className="flex justify-between w-full">
+          <div className="flex justify-between w-full items-center">
             <div>
               <h2 className="text-xl font-semibold">
                 {username}
@@ -191,24 +194,33 @@ const Settings = () => {
                 {email || "No Email Available"}
               </p>
             </div>
-            {/* Add Referral Code Badge and Copy Button */}
-            {referralCode && (
-              <div className="flex flex-col">
-                <h4 className="text-muted-foreground text-sm">Refer a Friend</h4>
-                <div className="flex items-center">
-                  <Badge variant="secondary" className="text-lg px-3">{referralCode}</Badge>
-                  <Button
-                    variant="ghost"
-                  size="icon"
-                  className="rounded-none hover:bg-transparent -ml-1"
-                  onClick={() => handleCopy(referralCode)}
-                  aria-label="Copy referral code"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
+            <div>
+
+              {/* Add Referral Code Badge and Copy Button */}
+              {referralCode && (
+                <div className="flex flex-col gap-0.5">
+                  <h6 className="text-muted-foreground text-sm">
+                    {referralCount || 0} friends joined
+                  </h6>
+                  <div className="flex items-center">
+                    <Badge variant="secondary" className="text-lg px-3">{referralCode}</Badge>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-none hover:bg-transparent -ml-1"
+                      onClick={() => handleCopy(referralCode)}
+                      aria-label="Copy referral code"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+
+                  </div>
+                  <h6 className="text-muted-foreground text-sm">Refer a Friend</h6>
                 </div>
-              </div>
-            )}
+              )}
+
+            </div>
+
           </div>
 
         </div>

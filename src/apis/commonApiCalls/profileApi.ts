@@ -22,6 +22,7 @@ export const fetchUserProfile = async (
   
   const userData = response.data.result[0];
   const isCurrentUser = currentUserId === userId;
+  console.log(userData);
 
   return {
     success: true,
@@ -45,6 +46,7 @@ export const fetchUserProfile = async (
       public: userData.public || 0,
       isBlocked: userData.isBlocked,
       referralCode: userData.referralCode || "",
+      referralCount: userData.referralData?.referralCount || 0,
     },
   };
 };
