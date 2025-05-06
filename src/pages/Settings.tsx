@@ -200,7 +200,7 @@ const Settings = () => {
               {referralCode && (
                 <div className="flex flex-col gap-0.5">
                   <h6 className="text-muted-foreground text-sm">
-                    {referralCount || 0} friends joined
+                    {referralCount || 0} Friends Joined
                   </h6>
                   <div className="flex items-center">
                     <Badge variant="secondary" className="text-lg px-3">{referralCode}</Badge>
