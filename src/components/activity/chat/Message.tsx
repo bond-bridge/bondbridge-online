@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
 import { Message as MessageType, Reaction } from "@/store/chatSlice";
-import { isPostShare, parsePostShare } from "@/utils/messageUtils";
+import { isPostShare, parsePostShare, isStoryReply, parseStoryReply } from "@/utils/messageUtils";
 import { CornerUpLeft, Image, Video } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 
@@ -37,6 +37,22 @@ interface SharedPostData {
   communityId?: string;
 }
 
+// Interface for story reply data
+interface StoryReplyData {
+  senderId: string;
+  content: string;
+  entityId: string;
+  media: null | string;
+  entity: {
+    _id: string;
+    author: string;
+    createdAt: number;
+    storyReply: boolean;
+    url: string;
+    ago_time: string;
+  };
+}
+
 const Message: React.FC<MessageProps> = ({
   message,
   isFirstInSequence,
@@ -47,8 +63,9 @@ const Message: React.FC<MessageProps> = ({
   onAddReaction,
   onRemoveReaction,
 }) => {
-  // Check if message is a shared post using useState
+  // Check if message is a shared post or story reply using useState
   const [sharedPost, setSharedPost] = useState<SharedPostData | null>(null);
+  const [storyReply, setStoryReply] = useState<StoryReplyData | null>(null);
   // State to track media loading status
   const [mediaLoaded, setMediaLoaded] = useState(false);
   const [mediaError, setMediaError] = useState(false);
@@ -122,13 +139,14 @@ const Message: React.FC<MessageProps> = ({
   }, [message.reactions, userId]);
 
   useEffect(() => {
-    // Check if the message is a post share using the utility function
+    console.log("message", message)
+    // Check if the message is a post share or story reply
     if (isPostShare(message.text)) {
       try {
-        // Parse the post content using the utility function
         const parsedPost = parsePostShare(message.text as string);
         console.log("Parsed shared post:", parsedPost);
         setSharedPost(parsedPost);
+        setStoryReply(null);
         
         // Reset media states when post changes
         setMediaLoaded(false);
@@ -138,8 +156,24 @@ const Message: React.FC<MessageProps> = ({
         console.error("Error parsing shared post in Message component:", error);
         setSharedPost(null);
       }
+    } else if (isStoryReply(message.text)) {
+      try {
+        const parsedStory = parseStoryReply(message.text as string);
+        console.log("Parsed story reply:", parsedStory);
+        setStoryReply(parsedStory);
+        setSharedPost(null);
+        
+        // Reset media states when story changes
+        setMediaLoaded(false);
+        setMediaError(false);
+        setIsVideoLoading(false);
+      } catch (error) {
+        console.error("Error parsing story reply in Message component:", error);
+        setStoryReply(null);
+      }
     } else {
       setSharedPost(null);
+      setStoryReply(null);
     }
   }, [message.text]);
 
@@ -426,7 +460,7 @@ const Message: React.FC<MessageProps> = ({
               </div>
             )}
 
-            {/* Render shared post if available */}
+            {/* Render shared post or story reply if available */}
             {sharedPost ? (
               <div className="shared-post">
                 <div className="border rounded-md overflow-hidden bg-background text-foreground mb-2 cursor-pointer">
@@ -514,6 +548,48 @@ const Message: React.FC<MessageProps> = ({
                       </p>
                     </div>
                   </Link>
+                </div>
+                <span className="text-xs opacity-70 block text-right">
+                  {message.timestamp}
+                </span>
+              </div>
+            ) : storyReply ? (
+              <div className="story-reply">
+                <div className="border rounded-md overflow-hidden bg-background text-foreground mb-2">
+                  {/* Story image */}
+                  <div className="w-full h-[250px] overflow-hidden bg-muted/30 flex items-center justify-center relative">
+                    {/* Loading indicator */}
+                    {!mediaLoaded && (
+                      <div className="absolute inset-0 flex items-center justify-center z-10">
+                        <Image size={24} className="text-muted-foreground animate-pulse" />
+                      </div>
+                    )}
+
+                    <img
+                      src={storyReply.entity.url}
+                      alt="Story"
+                      className={`w-[400px] h-full object-cover transition-opacity duration-200 ${mediaLoaded ? 'opacity-100' : 'opacity-0'}`}
+                      onLoad={() => {
+                        console.log("Story image loaded successfully");
+                        setMediaLoaded(true);
+                      }}
+                      onError={(e) => {
+                        console.error("Failed to load story image:", storyReply.entity.url);
+                        setMediaError(true);
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  </div>
+
+                  {/* Story reply content */}
+                  <div className="p-2">
+                    <p className="text-xs font-medium mb-1">
+                      Replied to a story 
+                    </p>
+                    <p className="text-sm">
+                      {JSON.parse(message.text as string).content}
+                    </p>
+                  </div>
                 </div>
                 <span className="text-xs opacity-70 block text-right">
                   {message.timestamp}

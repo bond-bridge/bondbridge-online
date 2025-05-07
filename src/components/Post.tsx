@@ -252,17 +252,17 @@ export function Post({
                                     {media.map((item, index) => (
                                         <CarouselItem key={`${userId}-media-${index}`}>
                                             {item.type === "image" && (
-                                                <div className="max-h-[100vh] relative bg-background flex items-end justify-center">
+                                                <div className="max-h-[70vh] relative bg-background flex items-end justify-center">
                                                     <img
                                                         src={item.url}
                                                         alt={`Post media ${index + 1}`}
-                                                        className="max-h-[100vh] w-full object-contain"
+                                                        className="max-h-[70vh] w-full object-contain"
                                                     />
                                                 </div>
                                             )}
                                             {item.type === "video" && (
                                                 <div
-                                                    className="max-h-[100vh] relative bg-background flex items-center justify-center"
+                                                    className="max-h-[70vh] relative bg-background flex items-center justify-center"
                                                     onMouseEnter={() => setShowControls(true)}
                                                     onMouseLeave={() => setShowControls(false)}
                                                 >
@@ -271,7 +271,7 @@ export function Post({
                                                             if (el) videoRefs.current[index] = el;
                                                         }}
                                                         src={item.url}
-                                                        className="max-h-[100vh] w-full object-contain"
+                                                        className="max-h-[70vh] w-full object-contain"
                                                         autoPlay
                                                         loop
                                                         muted={isMuted}
@@ -288,8 +288,8 @@ export function Post({
                                         </CarouselItem>
                                     ))}
                                 </CarouselContent>
-                                <CarouselPrevious className="left-2 bg-background/80" />
-                                <CarouselNext className="right-2 bg-background/80" />
+                                <CarouselPrevious className="left-0 bg-background/80" />
+                                <CarouselNext className="right-0 bg-background/80" />
                             </Carousel>
                         </div>
                     )}
@@ -297,17 +297,17 @@ export function Post({
                     {!hasMultipleMedia && hasSingleMedia && (
                         <div className="mt-3 rounded-lg overflow-hidden">
                             {media && media.length > 0 && media[0].type === "image" && (
-                                <div className="max-h-[100vh] relative bg-background flex items-center justify-center">
+                                <div className="max-h-[70vh] relative bg-background flex items-center justify-center">
                                     <img
                                         src={media[0].url}
                                         alt="Post"
-                                        className="max-h-[100vh] w-full object-contain"
+                                        className="max-h-[70vh] w-full object-contain"
                                     />
                                 </div>
                             )}
                             {media && media.length > 0 && media[0].type === "video" && (
                                 <div
-                                    className="max-h-[100vh] relative bg-background flex items-center justify-center"
+                                    className="max-h-[70vh] relative bg-background flex items-center justify-center"
                                     onMouseEnter={() => setShowControls(true)}
                                     onMouseLeave={() => setShowControls(false)}
                                 >
@@ -316,7 +316,7 @@ export function Post({
                                             if (el) videoRefs.current[0] = el;
                                         }}
                                         src={media[0].url}
-                                        className="max-h-[100vh] w-full object-contain"
+                                        className="max-h-[70vh] w-full object-contain"
                                         autoPlay
                                         loop
                                         muted={isMuted}
@@ -369,7 +369,7 @@ export function Post({
 
                 {feedId && (
                     <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
-                        <DialogContent className="sm:max-w-md h-[80vh]">
+                        <DialogContent className="sm:max-w-md h-[70vh]">
                             <SharePostPage
                                 postData={{
                                     _id: feedId,
