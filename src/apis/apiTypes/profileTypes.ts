@@ -17,6 +17,8 @@ export interface UserProfileData {
   communities?: string[];
   public?: number;
   isBlocked: boolean;
+  referralCode?: string;
+  referralCount?: number;
 }
 
 export interface PostData {

@@ -111,6 +111,7 @@ export type CreateProfileResponse = {
     interests: string[];
     name: string;
     profilePic?: string;
+    referralCode?: string;
   };
   apiToken: string;
   socketToken: string;

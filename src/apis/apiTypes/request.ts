@@ -53,6 +53,7 @@ export interface CreateProfileRequest {
   avatar?: string;
   communitiesSelected?: Community[];
   generateToken?: string;
+  referralCode?: string;
 }
 
 export interface FetchAvatarsRequest {

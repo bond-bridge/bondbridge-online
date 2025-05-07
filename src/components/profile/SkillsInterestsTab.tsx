@@ -17,12 +17,12 @@ const AvailableInterestItem = ({ interest, onAdd }: { interest: string; onAdd: (
   
   return (
     <button
-      className="border-2 border-border text-foreground px-3 py-1 rounded-full flex items-center cursor-pointer hover:bg-secondary"
+      className="border-2 w-full border-border text-foreground px-3 py-1 rounded-full truncate text-left cursor-pointer hover:bg-secondary"
       onClick={() => onAdd(interest)}
       title={title}
     >
       <span className="flex-shrink-0">+</span>
-      <span ref={textRef} className="truncate ml-1 max-w-[150px]">{interest}</span>
+      <span ref={textRef} className="truncate ml-2">{interest}</span>
     </button>
   );
 };
@@ -93,7 +93,7 @@ const SkillsInterestsTab: React.FC<SkillsInterestsTabProps> = ({ onValidationCha
           items={availableInterests}
           limit={15}
           className="h-[30vh] overflow-y-auto"
-          itemsContainerClassName="grid grid-cols-2 md:grid-cols-3 gap-3"
+          itemsContainerClassName="grid grid-cols-2 md:grid-cols-3 gap-3 w-full"
           emptyMessage="No more available interests"
           renderItem={(interest) => (
             <AvailableInterestItem 

@@ -15,6 +15,7 @@ export const createProfile = createSlice({
   name: "createProfile",
   initialState: {
     ...INITIAL_PROFILE_STATE,
+    referralCode: "",
     skillsAvailable: [...AVAILABLE_INTERESTS],
     skillSelected: [...INITIAL_PROFILE_STATE.skillSelected],
     communitiesSelected: [...INITIAL_PROFILE_STATE.communitiesSelected],
@@ -32,6 +33,9 @@ export const createProfile = createSlice({
     },
     setPassword: (state, action) => {
       state.password = action.payload;
+    },
+    setReferralCode: (state, action: PayloadAction<string>) => {
+      state.referralCode = action.payload;
     },
     addSkill: (state, action) => {
       const skill = action.payload;
@@ -78,6 +82,7 @@ export const {
   setEmail,
   setDateOfBirth,
   setPassword,
+  setReferralCode,
   addSkill,
   removeSkill,
   setAvatar,

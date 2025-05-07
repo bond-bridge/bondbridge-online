@@ -44,6 +44,8 @@ export const fetchUserProfile = async (
       communities: userData.communities || [],
       public: userData.public || 0,
       isBlocked: userData.isBlocked,
+      referralCode: userData.referralCode || "",
+      referralCount: userData.referralData?.referralCount || 0,
     },
   };
 };

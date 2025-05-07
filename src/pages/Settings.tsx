@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Copy } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store";
 import {
   setActivePage,
@@ -26,8 +29,17 @@ const Settings = () => {
   const [searchParams] = useSearchParams();
 
   // Get user data from Redux store
-  const { username,  email, avatar, privacyLevel, profilePic } =
+  const { username, email, avatar, privacyLevel, profilePic, referralCode, referralCount } =
     useAppSelector((state) => state.currentUser);
+
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success("Referral code copied to clipboard!");
+    }).catch(err => {
+      console.error("Failed to copy text: ", err);
+      toast.error("Failed to copy referral code.");
+    });
+  };
 
   const handleSettingsClick = (page: SettingPage) => {
     dispatch(setSettingsActive(true));
@@ -70,6 +82,8 @@ const Settings = () => {
               bio: result.data.bio,
               interests: result.data.interests,
               public: result.data.public,
+              referralCode: result.data.referralCode,
+              referralCount: result.data.referralCount,
             })
           );
         }
@@ -98,6 +112,8 @@ const Settings = () => {
                 bio: result.data.bio,
                 interests: result.data.interests,
                 public: result.data.public,
+                referralCode: result.data.referralCode,
+                referralCount: result.data.referralCount,
               })
             );
           }
@@ -168,14 +184,45 @@ const Settings = () => {
             />
             <AvatarFallback>{username?.substring(0, 2) || "U"}</AvatarFallback>
           </Avatar>
-          <div>
-            <h2 className="text-xl font-semibold">
-              {username}
-            </h2>
-            <p className="text-muted-foreground">
-              {email || "No Email Available"}
-            </p>
+
+          <div className="flex justify-between w-full items-center">
+            <div>
+              <h2 className="text-xl font-semibold">
+                {username}
+              </h2>
+              <p className="text-muted-foreground">
+                {email || "No Email Available"}
+              </p>
+            </div>
+            <div>
+
+              {/* Add Referral Code Badge and Copy Button */}
+              {referralCode && (
+                <div className="flex flex-col gap-0.5">
+                  <h6 className="text-muted-foreground text-sm">
+                    {referralCount || 0} Friends Joined
+                  </h6>
+                  <div className="flex items-center">
+                    <Badge variant="secondary" className="text-lg px-3">{referralCode}</Badge>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-none hover:bg-transparent -ml-1"
+                      onClick={() => handleCopy(referralCode)}
+                      aria-label="Copy referral code"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+
+                  </div>
+                  <h6 className="text-muted-foreground text-sm">Refer a Friend</h6>
+                </div>
+              )}
+
+            </div>
+
           </div>
+
         </div>
       )}
 

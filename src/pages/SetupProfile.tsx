@@ -76,7 +76,8 @@ const SetupProfile: React.FC = () => {
     skillSelected,
     avatar,
     image,
-    communitiesSelected
+    communitiesSelected,
+    referralCode
   } = useAppSelector(state => state.createProfile);
 
   // Use our custom hooks for API calls
@@ -93,6 +94,7 @@ const SetupProfile: React.FC = () => {
       dateOfBirth,
       password,
       skillSelected,
+      referralCode: referralCode || "",
       image: image || undefined,
       avatar: avatar || undefined,
       generateToken: "1",
