@@ -90,52 +90,46 @@ const PrivacyPolicy: React.FC = () => {
 
           <h2 className="text-xl font-semibold mt-8 mb-4">Device Permissions and Data Access</h2>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
               <h3 className="font-medium mb-2">Phone Number Access</h3>
               <p className="leading-relaxed">
-                We collect the user's phone number during account creation to enable secure identity verification 
-                and simplify the login process using OTP-based authentication.
+                We collect the user's mobile number during the account creation process. This is a crucial step to verify user identity and ensure secure access to the application. The phone number also enables a simplified login process using OTP (One-Time Password) authentication, reducing the risk of unauthorized access. It is stored securely and not shared with any external parties.
               </p>
             </div>
 
             <div>
               <h3 className="font-medium mb-2">Microphone Access</h3>
               <p className="leading-relaxed">
-                The app requests microphone access to support the speech-to-text functionality, 
-                allowing users to send voice input as text messages within the app.
+                Microphone access is required to enable the speech-to-text functionality within the app. This feature allows users to convert their voice into written text, enhancing the ease of communication—especially in chat and note-taking features. The microphone is activated only when the user initiates a voice input action, and no background recording is performed.
               </p>
             </div>
 
             <div>
               <h3 className="font-medium mb-2">Camera Access</h3>
               <p className="leading-relaxed">
-                Users can capture photos and videos directly through the app for creating posts or stories. 
-                Camera access is essential to enable this feature.
+                We request access to the device's camera to allow users to capture photos and videos directly from the app. This is particularly useful when creating stories, posts, or updating profile pictures. Camera access enhances user engagement by enabling real-time media creation without needing to switch to external apps.
               </p>
             </div>
 
             <div>
               <h3 className="font-medium mb-2">Gallery Access</h3>
               <p className="leading-relaxed">
-                We require access to the device's photo and video gallery so users can upload existing media 
-                for their posts, stories, or profile updates.
+                Gallery (media storage) access is required to let users upload existing images or videos from their device. This is essential for posting content, sharing visual updates, or changing profile photos. The app only accesses files that the user selects—no other files or folders are browsed or stored.
               </p>
             </div>
 
             <div>
               <h3 className="font-medium mb-2">OTP Access</h3>
               <p className="leading-relaxed">
-                Our app reads OTP messages automatically (with user permission) to streamline the login and 
-                verification process, saving users from manual entry.
+                To ensure a seamless and secure login experience, our app uses SMS permission to automatically detect and fill in OTPs (One-Time Passwords) sent during account verification or login. This improves user experience by eliminating the need for manual entry, while also adding a layer of security through timely verification.
               </p>
             </div>
 
             <div>
               <h3 className="font-medium mb-2">Data Usage and Sharing</h3>
               <p className="leading-relaxed">
-                We strictly do not share, sell, or disclose any user data to third parties. 
-                All personal data is used solely for improving in-app features and ensuring secure access.
+                TaxiSure is committed to safeguarding user privacy. All personal data collected is used strictly for internal purposes such as account management, security, personalization, and service improvement. We do not share, sell, or transfer any user data to third-party entities under any circumstances. Our data handling practices fully comply with applicable privacy regulations, and we take all necessary measures to protect your information.
               </p>
             </div>
           </div>
