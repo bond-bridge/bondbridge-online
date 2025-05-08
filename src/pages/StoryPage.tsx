@@ -9,6 +9,9 @@ import { StoryItem, StoryUser } from '@/types/story';
 import ThreeDotsMenu, { DeleteMenuItem } from '@/components/global/ThreeDotsMenu';
 import StoryViewersList from '@/components/StoryViewersList';
 import { toast } from "sonner";
+import { useSocket } from '@/context/SocketContext';
+import { startMessage } from '@/apis/commonApiCalls/chatApi';
+import { useAppSelector } from '@/store';
 
 export default function StoryPage() {
     const navigate = useNavigate();
@@ -32,11 +35,18 @@ export default function StoryPage() {
     const [animationEndDetector, setAnimationEndDetector] = useState(0);
     const [menuOpen, setMenuOpen] = useState(false);
     const currentLoggedInUserId = localStorage.getItem('userId') || "";
+    const [replyText, setReplyText] = useState('');
+    const { socket, isConnected } = useSocket();
+    const [executeStartMessage] = useApiCall(startMessage);
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     
     // Use our custom hook for API calls
     const [executeSaveInteraction] = useApiCall(saveStoryInteraction);
     const [executeGetStoryForUser] = useApiCall(getStoryForUser);
     const [executeArchiveStory] = useApiCall(archiveStory);
+
+    // Get current user data from Redux store
+    const currentUserData = useAppSelector((state) => state.currentUser);
 
     // Initialize with the story data passed from the HomePage or fetch from API
     useEffect(() => {
@@ -548,6 +558,134 @@ export default function StoryPage() {
         };
     }, [menuOpen, allStories, currentUserIndex, currentStoryIndex, showViewers]);
 
+    const handleSendReply = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
+        console.log("Sending reply");
+        
+        if (!replyText.trim()) {
+            toast.error("Please enter a reply");
+            return;
+        }
+
+        if (!socket || !isConnected) {
+            toast.error("Not connected to chat server");
+            return;
+        }
+
+        try {
+            const userId = currentUserData.userId;
+            const storyAuthorId = currentStoryItem.author;
+            console.log("finding chat with ", storyAuthorId)
+
+            // Start or get conversation with story author
+            const startChatResult = await executeStartMessage({ userId2: storyAuthorId });
+            
+            if (!startChatResult.success || !startChatResult.data) {
+                throw new Error("Failed to start conversation");
+            }
+            console.log("chat" ,startChatResult.data)
+
+            const chatId = startChatResult.data.chatRoom.chatRoomId;
+    
+            const userName = currentUserData.username;
+            const userAvatar = currentUserData.profilePic;
+
+            // Create story reply message data
+            const messageData = {
+                senderId: userId,
+                content: JSON.stringify({
+                    senderId: userId,
+                    content: replyText,
+                    entityId: currentStoryItem._id,
+                    media: null,
+                    entity: {
+                        _id: currentStoryItem._id,
+                        author: currentStoryItem.author,
+                        createdAt: currentStoryItem.createdAt,
+                        storyReply: true,
+                        url: currentStoryItem.url,
+                        ago_time: currentStoryItem.ago_time
+                    },
+                    isBot: false
+                }),
+                entityId: chatId,
+                media: null,
+                entity: "chat",
+                isBot: false,
+                senderName: userName,
+                senderAvatar: userAvatar
+            };
+
+            // Join the chat room
+            socket.emit("join", chatId);
+            console.log("Joined chat room", chatId);
+            
+            // Wait a moment for join to complete
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            // Send the message
+            socket.emit("sendMessage", messageData);
+            console.log("Sent message", messageData);
+            
+            // Wait to ensure message is sent
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            // Leave the chat room
+            socket.emit("leave", chatId);
+
+            // Clear the input and show success message
+            setReplyText('');
+            toast.success("Reply sent successfully");
+
+        } catch (error) {
+            console.error("Error sending story reply:", error);
+            toast.error("Failed to send reply");
+        }
+    };
+
+    // Handle typing in reply input
+    const handleReplyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setReplyText(e.target.value);
+        
+        // Clear any existing timeout
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+        
+        // Pause the story when typing
+        setIsPaused(true);
+        if (isVideo) {
+            videoRef.current?.pause();
+            setIsVideoPlaying(false);
+        }
+        
+        // Set a timeout to resume after 5 seconds of no typing
+        typingTimeoutRef.current = setTimeout(() => {
+            // Only resume if viewers panel and menu are closed
+            if (!showViewers && !menuOpen) {
+                setIsPaused(false);
+                if (isVideo && videoRef.current) {
+                    videoRef.current.play()
+                        .then(() => {
+                            setIsVideoPlaying(true);
+                        })
+                        .catch(error => {
+                            console.error("Video playback failed:", error);
+                        });
+                }
+            }
+        }, 5000);
+    };
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
+        };
+    }, []);
+
     // If still loading or no stories, show a loading state
     if (isLoading || allStories.length === 0) {
         return <div className="flex items-center justify-center h-screen">Loading stories...</div>;
@@ -783,14 +921,19 @@ export default function StoryPage() {
                             ref={inputRef}
                             placeholder="What's on your mind..."
                             className="bg-muted border-none rounded-full text-sm"
-                            onClick={(e) => e.stopPropagation()} // Prevent triggering the parent's onClick
+                            onClick={(e) => e.stopPropagation()}
+                            value={replyText}
+                            onChange={handleReplyChange}
+                            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSendReply(e as unknown as React.MouseEvent<HTMLButtonElement>);
+                                }
+                            }}
                         />
                         <button 
                             className="p-2 rounded-full text-primary-foreground flex-shrink-0"
-                            onClick={(e) => {
-                                e.stopPropagation(); // Prevent triggering the parent's onClick
-                                /* Add send message logic here */
-                            }}
+                            onClick={handleSendReply}
                         >
                             <Send className="h-5 w-5" />
                         </button>

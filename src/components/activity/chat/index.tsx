@@ -25,7 +25,7 @@ import { EditGroupModal } from "../EditGroupModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchFollowersList } from "@/apis/commonApiCalls/profileApi";
 import { SimpleFollower } from "./InviteFollowers";
-import { isPostShare } from "@/utils/messageUtils";
+import { isPostShare, isStoryReply } from "@/utils/messageUtils";
 
 // Components
 import ChatHeader from "./ChatHeader";
@@ -118,6 +118,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     isTyping,
     activeChat: chat,
   } = useAppSelector((state) => state.chat);
+  console.log(chat)
 
   // API calls
   const [executeGetMessages] = useApiCall(getMessages);
@@ -267,6 +268,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         // Check if the message is from current user
         const isFromCurrentUser = data.senderId === userId;
         const isPost = isPostShare(data.content);
+        const isStoryReplyMessage = isStoryReply(data.content);
         let isFromSameDevice = true;
         if (data.deviceId) {
           isFromSameDevice = data.deviceId === deviceId;
@@ -294,7 +296,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         }
 
         // For normal messages from us (no tempId), try to match based on content
-        if (isFromCurrentUser && !isPost && data._id) {
+        if (isFromCurrentUser && !isPost && !isStoryReplyMessage && data._id) {
           // Use the current redux state directly instead of the messages variable
           // which might be stale due to the async nature of hooks
           const state = store.getState();
@@ -325,7 +327,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         }
 
         // If it's not a post share and it's from the current user, we've probably already added it
-        if (!isPost && isFromCurrentUser && isFromSameDevice) {
+        if (!isPost && !isStoryReplyMessage && isFromCurrentUser && isFromSameDevice) {
           return;
         }
 
@@ -358,6 +360,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         // Add additional logging for post shares
         if (isPost) {
           console.log("Received a post share:", {
+            from: data.senderId,
+            isOwnPost: isFromCurrentUser,
+          });
+        }
+        if(isStoryReplyMessage) {
+          console.log("Received a story reply:", {
             from: data.senderId,
             isOwnPost: isFromCurrentUser,
           });

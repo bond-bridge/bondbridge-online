@@ -88,7 +88,53 @@ const PrivacyPolicy: React.FC = () => {
             safer, more secure, more fulfilling and easier to utilize.
           </p>
 
-          <p className="leading-relaxed">
+          <h2 className="text-xl font-semibold mt-8 mb-4">Device Permissions and Data Access</h2>
+
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-medium mb-2">Phone Number Access</h3>
+              <p className="leading-relaxed">
+                We collect the user's mobile number during the account creation process. This is a crucial step to verify user identity and ensure secure access to the application. The phone number also enables a simplified login process using OTP (One-Time Password) authentication, reducing the risk of unauthorized access. It is stored securely and not shared with any external parties.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-medium mb-2">Microphone Access</h3>
+              <p className="leading-relaxed">
+                Microphone access is required to enable the speech-to-text functionality within the app. This feature allows users to convert their voice into written text, enhancing the ease of communication—especially in chat and note-taking features. The microphone is activated only when the user initiates a voice input action, and no background recording is performed.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-medium mb-2">Camera Access</h3>
+              <p className="leading-relaxed">
+                We request access to the device's camera to allow users to capture photos and videos directly from the app. This is particularly useful when creating stories, posts, or updating profile pictures. Camera access enhances user engagement by enabling real-time media creation without needing to switch to external apps.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-medium mb-2">Gallery Access</h3>
+              <p className="leading-relaxed">
+                Gallery (media storage) access is required to let users upload existing images or videos from their device. This is essential for posting content, sharing visual updates, or changing profile photos. The app only accesses files that the user selects—no other files or folders are browsed or stored.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-medium mb-2">OTP Access</h3>
+              <p className="leading-relaxed">
+                To ensure a seamless and secure login experience, our app uses SMS permission to automatically detect and fill in OTPs (One-Time Passwords) sent during account verification or login. This improves user experience by eliminating the need for manual entry, while also adding a layer of security through timely verification.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-medium mb-2">Data Usage and Sharing</h3>
+              <p className="leading-relaxed">
+                TaxiSure is committed to safeguarding user privacy. All personal data collected is used strictly for internal purposes such as account management, security, personalization, and service improvement. We do not share, sell, or transfer any user data to third-party entities under any circumstances. Our data handling practices fully comply with applicable privacy regulations, and we take all necessary measures to protect your information.
+              </p>
+            </div>
+          </div>
+
+          <p className="leading-relaxed mt-8">
             Contact Us: If there are any questions or issues regarding this
             website, our practices, or any of our policies, please contact us
             via e-mail at: info@bondbridge.com

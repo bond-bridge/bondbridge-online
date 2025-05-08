@@ -1204,7 +1204,7 @@ const CreatePost = ({
             )}
 
             {/* Main Preview */}
-            <div className="relative w-full rounded-lg overflow-hidden bg-muted">
+            <div className="relative w-full rounded-lg overflow-hidden bg-muted max-h-[70vh]">
               <div className="relative">
                 {mediaFiles[activePreviewIndex]?.type.startsWith("video/") ? (
                   <div className="relative w-full h-full">
@@ -1222,7 +1222,7 @@ const CreatePost = ({
                     // Use previewUrl for existing media images
                     src={(mediaFiles[activePreviewIndex] as MediaFileWithUrl).previewUrl || mediaPreviews[activePreviewIndex]}
                     alt="Active Preview"
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain max-h-[70vh] "
                   />
                 )}
                 {!readOnlyMedia && (
@@ -1238,33 +1238,6 @@ const CreatePost = ({
           </div>
         )}
 
-        {documentFiles.length > 0 && (
-          <div className="mt-2 space-y-2">
-            {documentFiles.map((file, index) => (
-              <div
-                key={index}
-                className="p-2 bg-[var(--secondary)] rounded-md flex justify-between items-center"
-              >
-                <span className="text-sm text-[var(--muted-foreground)]">
-                  {file.name}
-                </span>
-                <button
-                  onClick={() =>
-                    setDocumentFiles((prev) =>
-                      prev.filter((_, i) => i !== index)
-                    )
-                  }
-                  className="p-1 hover:bg-[var(--secondary-hover)] rounded-full"
-                >
-                  <Trash2
-                    size={16}
-                    className="text-[var(--muted-foreground)]"
-                  />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Media Crop Modal */}
