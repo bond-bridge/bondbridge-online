@@ -382,7 +382,7 @@ const Message: React.FC<MessageProps> = ({
           )} */}
 
           <div
-            className={`p-[0.35rem] break-words min-w-[7rem] max-w-[75%] ${
+            className={`p-[0.35rem] break-words min-w-[7rem] max-w-[85%] ${
               message.isUser
                 ? `bg-primary text-primary-foreground ${
                     isFirstInSequence
@@ -431,27 +431,37 @@ const Message: React.FC<MessageProps> = ({
                       <div className="text-xs truncate flex-1">
                         {isPostShare(repliedToMessage.text)
                           ? "POST"
-                          : typeof repliedToMessage.text === "string"
-                            ? repliedToMessage.text
-                            : "Shared content"}
+                          : isStoryReply(repliedToMessage.text)
+                            ? "STORY"
+                            : typeof repliedToMessage.text === "string"
+                              ? repliedToMessage.text
+                              : "Shared content"}
                       </div>
                       
-                      {/* Show media thumbnail for replied post if available */}
-                      {isPostShare(repliedToMessage.text) && repliedPostMedia && (
+                      {/* Show media thumbnail for replied post or story if available */}
+                      {(isPostShare(repliedToMessage.text) || isStoryReply(repliedToMessage.text)) && (
                         <div className="h-5 w-5 overflow-hidden rounded-sm flex items-center justify-center bg-muted/30">
-                          {repliedPostMedia.type === "video" ? (
-                            <video 
-                              src={repliedPostMedia.url}
-                              className="h-full w-full object-cover"
-                              muted
-                            />
-                          ) : (
+                          {isPostShare(repliedToMessage.text) && repliedPostMedia ? (
+                            repliedPostMedia.type === "video" ? (
+                              <video 
+                                src={repliedPostMedia.url}
+                                className="h-full w-full object-cover"
+                                muted
+                              />
+                            ) : (
+                              <img 
+                                src={repliedPostMedia.url}
+                                alt="Post"
+                                className="h-full w-full object-cover"
+                              />
+                            )
+                          ) : isStoryReply(repliedToMessage.text) ? (
                             <img 
-                              src={repliedPostMedia.url}
-                              alt="Post"
+                              src={JSON.parse(repliedToMessage.text as string).entity.url}
+                              alt="Story"
                               className="h-full w-full object-cover"
                             />
-                          )}
+                          ) : null}
                         </div>
                       )}
                     </div>
@@ -584,7 +594,7 @@ const Message: React.FC<MessageProps> = ({
                   {/* Story reply content */}
                   <div className="p-2">
                     <p className="text-xs font-medium mb-1">
-                      Replied to a story 
+                      Replied to story 
                     </p>
                     <p className="text-sm">
                       {JSON.parse(message.text as string).content}

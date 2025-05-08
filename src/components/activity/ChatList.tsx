@@ -28,7 +28,7 @@ const ChatList = ({ chats, isLoading, onSelectChat }: ChatListProps) => {
       
       // Check if message is a story reply
       if (isStoryReply(message)) {
-        return "Replied to a story";
+        return "Replied to story";
       }
 
       // If message is a JSON string, try to parse it
