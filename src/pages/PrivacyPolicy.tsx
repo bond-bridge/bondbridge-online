@@ -88,7 +88,59 @@ const PrivacyPolicy: React.FC = () => {
             safer, more secure, more fulfilling and easier to utilize.
           </p>
 
-          <p className="leading-relaxed">
+          <h2 className="text-xl font-semibold mt-8 mb-4">Device Permissions and Data Access</h2>
+
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-medium mb-2">Phone Number Access</h3>
+              <p className="leading-relaxed">
+                We collect the user's phone number during account creation to enable secure identity verification 
+                and simplify the login process using OTP-based authentication.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-medium mb-2">Microphone Access</h3>
+              <p className="leading-relaxed">
+                The app requests microphone access to support the speech-to-text functionality, 
+                allowing users to send voice input as text messages within the app.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-medium mb-2">Camera Access</h3>
+              <p className="leading-relaxed">
+                Users can capture photos and videos directly through the app for creating posts or stories. 
+                Camera access is essential to enable this feature.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-medium mb-2">Gallery Access</h3>
+              <p className="leading-relaxed">
+                We require access to the device's photo and video gallery so users can upload existing media 
+                for their posts, stories, or profile updates.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-medium mb-2">OTP Access</h3>
+              <p className="leading-relaxed">
+                Our app reads OTP messages automatically (with user permission) to streamline the login and 
+                verification process, saving users from manual entry.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-medium mb-2">Data Usage and Sharing</h3>
+              <p className="leading-relaxed">
+                We strictly do not share, sell, or disclose any user data to third parties. 
+                All personal data is used solely for improving in-app features and ensuring secure access.
+              </p>
+            </div>
+          </div>
+
+          <p className="leading-relaxed mt-8">
             Contact Us: If there are any questions or issues regarding this
             website, our practices, or any of our policies, please contact us
             via e-mail at: info@bondbridge.com
