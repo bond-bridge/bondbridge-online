@@ -129,7 +129,7 @@ const PrivacyPolicy: React.FC = () => {
             <div>
               <h3 className="font-medium mb-2">Data Usage and Sharing</h3>
               <p className="leading-relaxed">
-                TaxiSure is committed to safeguarding user privacy. All personal data collected is used strictly for internal purposes such as account management, security, personalization, and service improvement. We do not share, sell, or transfer any user data to third-party entities under any circumstances. Our data handling practices fully comply with applicable privacy regulations, and we take all necessary measures to protect your information.
+                BondBridge is committed to safeguarding user privacy. All personal data collected is used strictly for internal purposes such as account management, security, personalization, and service improvement. We do not share, sell, or transfer any user data to third-party entities under any circumstances. Our data handling practices fully comply with applicable privacy regulations, and we take all necessary measures to protect your information.
               </p>
             </div>
           </div>
