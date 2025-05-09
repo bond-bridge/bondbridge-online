@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
+import { Copy, FileText, Shield } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store";
 import {
   setActivePage,
@@ -19,7 +19,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { useApiCall } from "@/apis/globalCatchError";
 import { toast } from "sonner";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 
 const Settings = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -339,6 +339,29 @@ const Settings = () => {
           </div>
           <span>Account</span>
         </button>
+
+        {/* Legal Links Section */}
+        <div className="mt-3 border-t border-border pt-2">
+          <Link
+            to="/terms"
+            className="w-full flex items-center gap-4 p-4 hover:bg-accent/50 cursor-pointer"
+          >
+            <div className="w-8 h-8 flex items-center justify-center rounded-full bg-muted">
+              <FileText className="h-5 w-5" />
+            </div>
+            <span>Terms & Conditions</span>
+          </Link>
+
+          <Link
+            to="/privacy"
+            className="w-full flex items-center gap-4 p-4 hover:bg-accent/50 cursor-pointer"
+          >
+            <div className="w-8 h-8 flex items-center justify-center rounded-full bg-muted">
+              <Shield className="h-5 w-5" />
+            </div>
+            <span>Privacy Policy</span>
+          </Link>
+        </div>
       </div>
     </div>
   );
