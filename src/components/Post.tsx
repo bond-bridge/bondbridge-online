@@ -45,7 +45,7 @@ export function Post({
     media = [],
     comments,
     datePosted,
-    agoTimeString = "",
+    // agoTimeString = "", //not used because we are using the datePosted (createdAt)
     isOwner = false,
     onCommentClick,
     onLikeClick,
@@ -59,6 +59,7 @@ export function Post({
     initialReactionCount = 0,
     initialReactionDetails = { total: 0, types: { like: 0, love: 0, haha: 0, lulu: 0 } }
 }: PostProps) {
+    console.log("datePosted", datePosted);
     const navigate = useNavigate();
     const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -67,8 +68,11 @@ export function Post({
     const videoRefs = useRef<Record<number, HTMLVideoElement>>({});
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const currentUserId = localStorage.getItem('userId') || '';
-    const timestamp = datePosted ? datePosted : 0;
-    const timeAgo = getRelativeTime(new Date(timestamp).toISOString());
+    const timestamp = (datePosted ? datePosted : 0) * (isCommunity ? 1 : 1000);
+    // normal backend sends in seconds, community sends in milliseconds
+
+    const date = new Date(timestamp);
+    const timeAgo = getRelativeTime(date.toISOString());
     // Use state to track reactions but initialize from props
     const [reactionCount, setReactionCount] = useState(initialReactionCount);
     const [reactionDetails, setReactionDetails] = useState(initialReactionDetails);
@@ -362,7 +366,7 @@ export function Post({
                             </button>
                         </div>
                         <div className="text-sm text-muted-foreground">
-                            {agoTimeString || timeAgo}
+                            {timeAgo}
                         </div>
                     </div>
                 </CardContent>
