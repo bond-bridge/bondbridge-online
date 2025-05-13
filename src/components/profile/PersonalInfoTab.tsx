@@ -32,6 +32,14 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({ onValidationChange })
   const [ageError, setAgeError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
+  // Check for referral code in sessionStorage on component mount
+  useEffect(() => {
+    const storedReferralCode = sessionStorage.getItem('referralCode');
+    if (storedReferralCode) {
+      dispatch(setReferralCode(storedReferralCode));
+    }
+  }, [dispatch]);
+
   const isAtLeast18YearsOld = (dateString: string): boolean => {
     const birthDate = new Date(dateString);
     const today = new Date();
@@ -221,6 +229,8 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({ onValidationChange })
             id="referralCode"
             value={referralCode}
             onChange={handleChange}
+            readOnly={!!sessionStorage.getItem('referralCode')}
+            className={sessionStorage.getItem('referralCode') ? 'bg-muted cursor-not-allowed' : ''}
           />
         </div>
 

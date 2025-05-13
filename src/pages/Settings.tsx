@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Link2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +32,7 @@ const Settings = () => {
   const { username, email, avatar, privacyLevel, profilePic, referralCode, referralCount } =
     useAppSelector((state) => state.currentUser);
 
-  const handleCopy = (text: string) => {
+  const handleCopyCode = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       toast.success("Referral code copied to clipboard!");
     }).catch(err => {
@@ -40,6 +40,18 @@ const Settings = () => {
       toast.error("Failed to copy referral code.");
     });
   };
+
+  const handleCopyLink = (text: string) => {
+    const baseUrl = window.location.origin;
+    const fullUrl = `${baseUrl}/signup?referral=${text}`;
+    navigator.clipboard.writeText(fullUrl).then(() => {
+      toast.success("Referral link copied to clipboard!");
+    }).catch(err => {
+      console.error("Failed to copy text: ", err);
+      toast.error("Failed to copy referral link.");
+    });
+  };
+  
 
   const handleSettingsClick = (page: SettingPage) => {
     dispatch(setSettingsActive(true));
@@ -208,10 +220,19 @@ const Settings = () => {
                       variant="ghost"
                       size="icon"
                       className="rounded-none hover:bg-transparent -ml-1"
-                      onClick={() => handleCopy(referralCode)}
+                      onClick={() => handleCopyCode(referralCode)}
                       aria-label="Copy referral code"
                     >
                       <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-none hover:bg-transparent -ml-1"
+                      onClick={() => handleCopyLink(referralCode)}
+                      aria-label="Copy referral link"
+                    >
+                      <Link2 className="h-4 w-4" />
                     </Button>
 
                   </div>

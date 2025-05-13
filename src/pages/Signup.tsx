@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AuthLayout from "../components/auth/AuthLayout";
 import OTPForm from "../components/auth/OTPForm";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -83,6 +83,15 @@ const Signup: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const navigate = useNavigate();
   const phoneInputRef = useRef(null);
+  const [searchParams] = useSearchParams();
+
+  // Handle referral code from URL
+  useEffect(() => {
+    const referralCode = searchParams.get('referral');
+    if (referralCode) {
+      sessionStorage.setItem('referralCode', referralCode);
+    }
+  }, [searchParams]);
 
   // Use our custom hooks for API calls
   const [executeSendOTP, isSendingOTP] = useApiCall(sendOTP);
