@@ -87,6 +87,9 @@ const SetupProfile: React.FC = () => {
 
   // Handle form submission
   const handleSubmit = async () => {
+    //delete referral code from session storage
+    sessionStorage.removeItem('referralCode');
+
     // First submit the profile
     const result = await executeSubmit({
       name,
