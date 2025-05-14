@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Link2 } from "lucide-react";
+import { ArrowLeft, Gift } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Copy, FileText, Shield } from "lucide-react";
+import { FileText, Shield } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store";
 import {
   setActivePage,
@@ -29,29 +27,8 @@ const Settings = () => {
   const [searchParams] = useSearchParams();
 
   // Get user data from Redux store
-  const { username, email, avatar, privacyLevel, profilePic, referralCode, referralCount } =
+  const { username, email, avatar, privacyLevel, profilePic } =
     useAppSelector((state) => state.currentUser);
-
-  const handleCopyCode = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      toast.success("Referral code copied to clipboard!");
-    }).catch(err => {
-      console.error("Failed to copy text: ", err);
-      toast.error("Failed to copy referral code.");
-    });
-  };
-
-  const handleCopyLink = (text: string) => {
-    const baseUrl = window.location.origin;
-    const fullUrl = `${baseUrl}/signup?referral=${text}`;
-    navigator.clipboard.writeText(fullUrl).then(() => {
-      toast.success("Referral link copied to clipboard!");
-    }).catch(err => {
-      console.error("Failed to copy text: ", err);
-      toast.error("Failed to copy referral link.");
-    });
-  };
-  
 
   const handleSettingsClick = (page: SettingPage) => {
     dispatch(setSettingsActive(true));
@@ -94,8 +71,6 @@ const Settings = () => {
               bio: result.data.bio,
               interests: result.data.interests,
               public: result.data.public,
-              referralCode: result.data.referralCode,
-              referralCount: result.data.referralCount,
             })
           );
         }
@@ -121,11 +96,11 @@ const Settings = () => {
                 profilePic: result.data.profilePic,
                 avatar: result.data.avatarSrc,
                 privacyLevel: result.data.privacyLevel,
+                referralCode: result.data.referralCode,
+                referralCount: result.data.referralCount,
                 bio: result.data.bio,
                 interests: result.data.interests,
                 public: result.data.public,
-                referralCode: result.data.referralCode,
-                referralCount: result.data.referralCount,
               })
             );
           }
@@ -206,42 +181,6 @@ const Settings = () => {
                 {email || "No Email Available"}
               </p>
             </div>
-            <div>
-
-              {/* Add Referral Code Badge and Copy Button */}
-              {referralCode && (
-                <div className="flex flex-col gap-0.5">
-                  <h6 className="text-muted-foreground text-sm">
-                    {referralCount || 0} Friends Joined
-                  </h6>
-                  <div className="flex items-center">
-                    <Badge variant="secondary" className="text-lg px-3">{referralCode}</Badge>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-none hover:bg-transparent -ml-1"
-                      onClick={() => handleCopyCode(referralCode)}
-                      aria-label="Copy referral code"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-none hover:bg-transparent -ml-1"
-                      onClick={() => handleCopyLink(referralCode)}
-                      aria-label="Copy referral link"
-                    >
-                      <Link2 className="h-4 w-4" />
-                    </Button>
-
-                  </div>
-                  <h6 className="text-muted-foreground text-sm">Refer a Friend</h6>
-                </div>
-              )}
-
-            </div>
-
           </div>
 
         </div>
@@ -359,6 +298,17 @@ const Settings = () => {
             </svg>
           </div>
           <span>Account</span>
+        </button>
+
+        {/* Add New Referrals Link Here */}
+        <button
+          className="w-full flex items-center gap-4 p-4 hover:bg-accent/50 cursor-pointer"
+          onClick={() => handleSettingsClick("referrals")}
+        >
+          <div className="w-8 h-8 flex items-center justify-center rounded-full bg-muted">
+            <Gift className="h-5 w-5" />
+          </div>
+          <span>Referrals</span>
         </button>
 
         {/* Legal Links Section */}

@@ -5,6 +5,7 @@ import BlockedUsersPage from "./BlockedUsersPage";
 import VoiceSettingsPage from "./VoiceSettingsPage";
 import LogoutDeletePage from "./LogoutDeletePage";
 import PrivacySettingsPage from "./PrivacySettingsPage";
+import ReferralsPage from "./ReferralsPage";
 
 const SettingLayout: React.FC = () => {
   const { activePage } = useAppSelector((state) => state.settings);
@@ -18,6 +19,7 @@ const SettingLayout: React.FC = () => {
         {activePage === "voice" && <VoiceSettingsPage />}
         {activePage === "privacy" && <PrivacySettingsPage />}
         {activePage === "account" && <LogoutDeletePage />}
+        {activePage === "referrals" && <ReferralsPage />}
       </div>
     </div>
   );

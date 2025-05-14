@@ -7,7 +7,8 @@ export type SettingPage =
   | "blocked"
   | "voice"
   | "help"
-  | "account";
+  | "account"
+  | "referrals";
 
 interface BlockedUser {
   id: string;
