@@ -44,7 +44,7 @@ apiClient.interceptors.response.use(
       window.location.href = "/login"; // Adjust the login route as needed
     }
 
-    return Promise.reject(error);
+    return Promise.resolve(error);
   }
 );
 

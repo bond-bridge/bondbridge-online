@@ -42,12 +42,15 @@ export const sendOTP = async (phoneData: SendOTPRequest): Promise<SendOTPRespons
   }
   
   const response = await apiClient.post<SendOTPResponse>(`/send-otp`, requestBody);
+
+  console.log("response", response);
   
   if (response.status === 200) {
     console.log(response.data);
     return response.data;
   } else {
-    throw new Error(response.data.message || 'Failed to send OTP');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    throw new Error((response as any).response?.data.message || 'Failed to send OTP');
   }
 };
 
