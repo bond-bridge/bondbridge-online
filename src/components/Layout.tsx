@@ -5,7 +5,7 @@ import Navbar from "./Navbar";
 import { useAppDispatch, useAppSelector } from "@/store";
 import ChatInterface from "./activity/ChatInterface";
 import { setActiveChat } from "@/store/chatSlice";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { fetchUserProfile } from "@/apis/commonApiCalls/profileApi";
 import { getSuggestedUsers } from "@/apis/commonApiCalls/homepageApi";
 import { SuggestedUser } from "@/apis/apiTypes/response";
@@ -38,9 +38,15 @@ const Layout: React.FC<LayoutProps> = ({
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [suggestedUsers, setSuggestedUsers] = useState<SuggestedUser[]>([]);
   const [fetchSuggestedUsers, isLoadingSuggested] = useApiCall(getSuggestedUsers);
+  const location = useLocation();
 
   // Mobile detection - check for cookie to override
   const [useWebVersion, setUseWebVersion] = useState(false);
+  
+  // Define paths accessible on mobile without the app download prompt
+  const publicMobilePaths = ['/login', '/signup', '/setup-profile', '/privacy', '/terms','/forgot-password'];
+  const currentPath = location.pathname;
+  const isPublicMobilePath = publicMobilePaths.includes(currentPath);
   
   useEffect(() => {
     // Check for cookie that allows mobile users to use the web version
@@ -116,12 +122,12 @@ const Layout: React.FC<LayoutProps> = ({
 
   return (
     <>
-    {!useWebVersion && (
+    {!useWebVersion && !isPublicMobilePath && (
       <div className="md:hidden">
         <MobileAppDownload />
       </div>
     )}
-    <div className={`flex-col overflow-hidden h-screen w-screen overflow-x-hidden ${!useWebVersion ? 'hidden md:flex' : 'flex'}`}>
+    <div className={`flex-col overflow-hidden  w-screen overflow-x-hidden ${!useWebVersion && !isPublicMobilePath ? 'hidden md:flex h-screen' : 'flex'}`}>
       <Toaster/>
       {/* Navbar */}
       <Navbar />

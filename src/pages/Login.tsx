@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthLayout from "../components/auth/AuthLayout";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import IntlTelInput from "react-intl-tel-input";
-import "react-intl-tel-input/dist/main.css";
+// import IntlTelInput from "react-intl-tel-input";
+// import "react-intl-tel-input/dist/main.css";
 import { loginUser } from "../apis/commonApiCalls/authenticationApi";
 import { useApiCall } from "../apis/globalCatchError";
 import { Label } from "@/components/ui/label";
@@ -13,78 +13,79 @@ import { LoginResponse } from "../apis/apiTypes/response";
 import { useDispatch } from "react-redux";
 import { updateCurrentUser } from "../store/currentUserSlice";
 import { Eye, EyeOff } from "lucide-react";
+import { CustomPhoneInput } from "@/components/ui/custom-phone-input";
 
 // Custom styles for the phone input component that change with theme
-const customPhoneInputStyles = `
-  /* Theme Styles */
-  .intl-tel-input .country-list {
-    background-color: var(--background);
-    color: var(--foreground);
-    border-color: var(--border);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  }
+// const customPhoneInputStyles = `
+//   /* Theme Styles */
+//   .intl-tel-input .country-list {
+//     background-color: var(--background);
+//     color: var(--foreground);
+//     border-color: var(--border);
+//     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+//   }
   
-  .intl-tel-input .country-list .country {
-    color: var(--foreground);
-  }
+//   .intl-tel-input .country-list .country {
+//     color: var(--foreground);
+//   }
   
-  .intl-tel-input .country-list .country.highlight {
-    background-color: var(--muted);
-  }
+//   .intl-tel-input .country-list .country.highlight {
+//     background-color: var(--muted);
+//   }
   
-  .intl-tel-input .country-list .country .dial-code {
-    color: var(--muted-foreground);
-  }
+//   .intl-tel-input .country-list .country .dial-code {
+//     color: var(--muted-foreground);
+//   }
   
-  .intl-tel-input .selected-flag {
-    background-color: transparent;
-  }
+//   .intl-tel-input .selected-flag {
+//     background-color: transparent;
+//   }
 
-  .intl-tel-input.allow-dropdown .flag-container:hover .selected-flag {
-    background-color: var(--muted);
-  }
+//   .intl-tel-input.allow-dropdown .flag-container:hover .selected-flag {
+//     background-color: var(--muted);
+//   }
   
-  .intl-tel-input.allow-dropdown.separate-dial-code .selected-flag {
-    background-color: var(--muted);
-  }
+//   .intl-tel-input.allow-dropdown.separate-dial-code .selected-flag {
+//     background-color: var(--muted);
+//   }
   
-  .intl-tel-input .selected-dial-code {
-    color: var(--foreground);
-    padding-left: 10px; /* Add padding between flag and country code */
-  }
+//   .intl-tel-input .selected-dial-code {
+//     color: var(--foreground);
+//     padding-left: 10px; /* Add padding between flag and country code */
+//   }
   
-  .intl-tel-input input {
-    background-color: var(--background);
-    color: var(--foreground);
-    border-color: var(--border);
-  }
+//   .intl-tel-input input {
+//     background-color: var(--background);
+//     color: var(--foreground);
+//     border-color: var(--border);
+//   }
   
-  .intl-tel-input input:focus {
-    border-color: var(--ring);
-    box-shadow: 0 0 0 2px var(--ring);
-  }
+//   .intl-tel-input input:focus {
+//     border-color: var(--ring);
+//     box-shadow: 0 0 0 2px var(--ring);
+//   }
 
-  .intl-tel-input .country-list .divider {
-    border-bottom-color: var(--border);
-  }
+//   .intl-tel-input .country-list .divider {
+//     border-bottom-color: var(--border);
+//   }
   
-  /* Fix spacing between flag and dial code */
-  .intl-tel-input.separate-dial-code .selected-flag {
-    padding-right: 6px !important;
-  }
+//   /* Fix spacing between flag and dial code */
+//   .intl-tel-input.separate-dial-code .selected-flag {
+//     padding-right: 6px !important;
+//   }
   
-  .intl-tel-input.separate-dial-code .selected-dial-code {
-    margin-left: 6px !important;
-  }
-`;
+//   .intl-tel-input.separate-dial-code .selected-dial-code {
+//     margin-left: 6px !important;
+//   }
+// `;
 
 const Login: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [countryCode, setCountryCode] = useState("+1"); // Default to USA (+1)
+  const [countryCode, setCountryCode] = useState("1"); // Default to USA (dial code "1")
   const [, setIsValidPhone] = useState(false);
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
-  const phoneInputRef = useRef(null);
+  // const phoneInputRef = useRef(null); // No longer needed for CustomPhoneInput unless specific direct manipulation is required
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [passwordType, setPasswordType] = useState("password");
@@ -93,74 +94,76 @@ const Login: React.FC = () => {
   const [executeLogin, isLoggingIn] = useApiCall(loginUser);
 
   // Add effect to apply styles to the phone input after it's rendered
-  useEffect(() => {
-    // Apply custom theme styles
-    const styleElement = document.createElement("style");
-    styleElement.textContent = customPhoneInputStyles;
-    document.head.appendChild(styleElement);
+  // useEffect(() => {
+  //   // Apply custom theme styles
+  //   const styleElement = document.createElement("style");
+  //   styleElement.textContent = customPhoneInputStyles;
+  //   document.head.appendChild(styleElement);
 
-    const fixPhoneInputStyles = () => {
-      const container = document.querySelector(".intl-tel-input");
-      if (container) {
-        // Make width consistent
-        container.setAttribute(
-          "style",
-          "width: 100% !important; height: 40px !important;"
-        );
+  //   const fixPhoneInputStyles = () => {
+  //     const container = document.querySelector(".intl-tel-input");
+  //     if (container) {
+  //       // Make width consistent
+  //       container.setAttribute(
+  //         "style",
+  //         "width: 100% !important; height: 40px !important;"
+  //       );
 
-        // Fix flag container height
-        const flagContainer = container.querySelector(".flag-container");
-        if (flagContainer) {
-          flagContainer.setAttribute("style", "height: 100% !important;");
-        }
+  //       // Fix flag container height
+  //       const flagContainer = container.querySelector(".flag-container");
+  //       if (flagContainer) {
+  //         flagContainer.setAttribute("style", "height: 100% !important;");
+  //       }
 
-        // Fix selected flag height
-        const selectedFlag = container.querySelector(".selected-flag");
-        if (selectedFlag) {
-          selectedFlag.setAttribute(
-            "style",
-            "height: 100% !important; display: flex !important; align-items: center !important;"
-          );
-        }
+  //       // Fix selected flag height
+  //       const selectedFlag = container.querySelector(".selected-flag");
+  //       if (selectedFlag) {
+  //         selectedFlag.setAttribute(
+  //           "style",
+  //           "height: 100% !important; display: flex !important; align-items: center !important;"
+  //         );
+  //       }
 
-        // Fix selected dial code (country code) spacing
-        const selectedDialCode = container.querySelector(".selected-dial-code");
-        if (selectedDialCode) {
-          selectedDialCode.setAttribute(
-            "style",
-            "margin-left: 6px !important; padding-left: 0 !important;"
-          );
-        }
+  //       // Fix selected dial code (country code) spacing
+  //       const selectedDialCode = container.querySelector(".selected-dial-code");
+  //       if (selectedDialCode) {
+  //         selectedDialCode.setAttribute(
+  //           "style",
+  //           "margin-left: 6px !important; padding-left: 0 !important;"
+  //         );
+  //       }
 
-        // Fix input height
-        const input = container.querySelector("input");
-        if (input) {
-          input.setAttribute(
-            "style",
-            "height: 40px !important; background-color: var(--background) !important; color: var(--foreground) !important; border-color: var(--border) !important;"
-          );
-          input.classList.add(
-            "border",
-            "border-input",
-            "rounded-md",
-            "shadow-sm",
-            "focus:outline-none",
-            "focus:ring-ring",
-            "focus:border-ring"
-          );
-        }
-      }
-    };
+  //       // Fix input height
+  //       const input = container.querySelector("input");
+  //       if (input) {
+  //         input.setAttribute(
+  //           "style",
+  //           "height: 40px !important; background-color: var(--background) !important; color: var(--foreground) !important; border-color: var(--border) !important;"
+  //         );
+  //         input.classList.add(
+  //           "border",
+  //           "border-input",
+  //           "rounded-md",
+  //           "shadow-sm",
+  //           "focus:outline-none",
+  //           "focus:ring-ring",
+  //           "focus:border-ring"
+  //         );
+  //       }
+  //     }
+  //   };
 
-    // Run initially and after a small delay to ensure component is rendered
-    fixPhoneInputStyles();
-    const timeoutId = setTimeout(fixPhoneInputStyles, 100);
+  //   // Run initially and after a small delay to ensure component is rendered
+  //   fixPhoneInputStyles();
+  //   const timeoutId = setTimeout(fixPhoneInputStyles, 100);
 
-    return () => {
-      clearTimeout(timeoutId);
-      document.head.removeChild(styleElement);
-    };
-  }, []);
+  //   return () => {
+  //     clearTimeout(timeoutId);
+  //     if (document.head.contains(styleElement)) {
+  //      document.head.removeChild(styleElement);
+  //     }
+  //   };
+  // }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -249,7 +252,7 @@ const Login: React.FC = () => {
               Phone
             </Label>
             <div className="relative">
-              <IntlTelInput
+              {/* <IntlTelInput
                 ref={phoneInputRef}
                 containerClassName="intl-tel-input"
                 inputClassName="form-control w-full h-10 px-3 py-2 border border-input rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-ring"
@@ -262,6 +265,12 @@ const Login: React.FC = () => {
                 autoPlaceholder={true}
                 nationalMode={false}
                 separateDialCode={true}
+              /> */}
+              <CustomPhoneInput
+                value={phoneNumber}
+                onChange={handlePhoneChange}
+                defaultCountryCode={countryCode} // Pass the dial code, e.g., "1"
+                placeholder="Enter phone number"
               />
             </div>
           </div>

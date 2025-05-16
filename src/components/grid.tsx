@@ -21,8 +21,8 @@ interface GridProps {
 const Grid: React.FC<GridProps> = ({
   children,
   className,
-  padding = "p-8",
-  columns = "grid-cols-4",
+  padding = "p-4 md:p-8",
+  columns = "grid-cols-1 md:grid-cols-4",
   bgColor,
 }) => {
   return (
@@ -50,7 +50,7 @@ export const GridContentPanel: React.FC<{
   return (
     <div
       className={cn(
-        "bg-background/50 py-10 px-14 rounded-lg border backdrop-blur-md border-border shadow-sm relative z-10",
+        "bg-background/50 md:py-10 md:px-14 py-6 px-5 rounded-lg border backdrop-blur-md border-border shadow-sm relative z-10",
         className
       )}
     >

@@ -190,7 +190,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({ onValidationChange })
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 md:gap-4 gap-6">
 
         <div>
           <Label htmlFor="dob">

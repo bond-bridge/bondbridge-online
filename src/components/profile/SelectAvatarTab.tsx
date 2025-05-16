@@ -24,7 +24,7 @@ const AvatarGrid: React.FC<AvatarGridProps> = ({ avatars, type, selectedAvatar, 
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+    <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
       {avatars.map((avatarItem, index) => (
         <div
           key={`${type}-${index}-${avatarItem.url}`} // Enhanced key for more uniqueness
