@@ -161,7 +161,7 @@ const ReferralsPage: React.FC = () => {
         <div className="p-5 border border-border rounded-lg shadow-sm bg-card">
           <div className="flex items-center justify-between">
             <h4 className="text-md font-semibold text-foreground">Friends Joined</h4>
-            <p className="text-2xl font-bold text-primary">
+            <p className="text-2xl font-bold text-foreground">
               {referralCount || 0}
             </p>
           </div>
