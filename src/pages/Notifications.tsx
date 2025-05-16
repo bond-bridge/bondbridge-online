@@ -229,7 +229,7 @@ const Notifications = () => {
       limit: 10,
     });
     if (followRequestsResult.success && followRequestsResult.data) {
-      setFriendRequests(followRequestsResult.data.result || []);
+      setFriendRequests(followRequestsResult.data.result.filter((request: FollowRequest) => request) || []);
     } else {
       setFriendRequests([]);
     }
@@ -237,7 +237,7 @@ const Notifications = () => {
     // Fetch sent requests
     const sentRequestsResult = await executeSentRequestsFetch();
     if (sentRequestsResult.success && sentRequestsResult.data) {
-      setSentRequests(sentRequestsResult.data.result || []);
+      setSentRequests(sentRequestsResult.data.result.filter((request: FollowRequest) => request) || []);
     } else {
       setSentRequests([]);
     }

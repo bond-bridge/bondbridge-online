@@ -34,7 +34,7 @@ export default function Search() {
   const fetchSearchHistory = async () => {
     const { success, data } = await executeGetSearchHistory();
     if (success && data) {
-      setSearchHistory(data);
+      setSearchHistory(data.filter((user) => user.name));
       setPrevSearchHistory(data);
     }
   };
@@ -50,7 +50,7 @@ export default function Search() {
     const { success } = await executeClearHistory();
     if (!success) {
       // Revert to previous state if the API call fails
-      setSearchHistory(prevSearchHistory);
+      setSearchHistory(prevSearchHistory.filter((user) => user.name));
       toast.error("Failed to clear search history");
     }
   };

@@ -44,7 +44,7 @@ export const SearchHistoryItem = ({ user, onRemove, onRevert }: SearchHistoryIte
         <Avatar className="h-8 w-8">
           <AvatarImage src={user.profilePic} alt={user.name} className="h-8 w-8 rounded-full"/>
           <AvatarFallback className="bg-primary/5 text-primary font-medium">
-            {user.name[0]?.toUpperCase() || "U"}
+            {user.name?.charAt(0)?.toUpperCase() || "U"}
           </AvatarFallback>
         </Avatar>
         <span className="font-medium text-sm">{user.name}</span>
