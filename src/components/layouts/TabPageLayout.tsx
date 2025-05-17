@@ -105,12 +105,12 @@ const TabPageLayout: React.FC<TabPageLayoutProps> = ({
   };
 
   return (
-    <Grid className="h-[calc(100vh-64px)] grid items-center">
+    <Grid className="md:h-[calc(100vh-64px)] grid items-center">
       {/* Left Section: Heading + Nav */}
       <div className="">
-        <h1 className="text-5xl font-medium mb-6">{title}</h1>
+        <h1 className="md:text-5xl text-2xl font-medium mb-6">{title}</h1>
 
-        <nav className="space-y-4">
+        <nav className="space-y-4 hidden md:block">
           {tabs.map((tab) => (
             <Link
               key={tab.id}
@@ -131,7 +131,7 @@ const TabPageLayout: React.FC<TabPageLayoutProps> = ({
       </div>
 
       {/* Right Section: Form + Illustration */}
-      <div className="relative col-span-2">
+      <div className="relative col-span-2 ">
         <GridContentPanel>
           {/* Main Content */}
           {children}

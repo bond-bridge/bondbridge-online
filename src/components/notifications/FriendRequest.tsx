@@ -68,7 +68,7 @@ const FriendRequest = ({
         />
         <div>
           <h3 className="font-medium">{name}</h3>
-          <TruncatedText text={bio} limit={40} showToggle={false}/>
+          <TruncatedText text={bio} limit={40} align="left" showToggle={false}/>
         </div>
       </div>
       </Link>

@@ -13,14 +13,17 @@ const Navbar: React.FC = () => {
                             <h2 className="text-2xl font-extrabold grad">BondBridge</h2>
                         </a>
                     </div>
-                    <ModeToggle />
-                    {/* Mobile menu button */}
-                    <div className="flex items-center md:hidden">
-                        <button className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary">
-                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                        </button>
+
+                    <div className="flex items-center gap-2">
+                        <ModeToggle />
+                        {/* Mobile menu button
+                        <div className="flex items-center md:hidden">
+                            <button className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary">
+                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                        </div> */}
                     </div>
                 </div>
             </div>

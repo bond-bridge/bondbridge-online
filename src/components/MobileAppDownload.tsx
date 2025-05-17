@@ -14,17 +14,17 @@ const MobileAppDownload: React.FC = () => {
       </div>
       
       {/* Main content */}
-      <div className="text-center max-w-md mb-12">
+      <div className="text-center max-w-md mb-3">
         <h1 className="text-3xl font-bold mb-4">
           <span className="text-gray-800 dark:text-white">Experience</span> 
           <span className="grad ml-2">BondBridge</span>
         </h1>
-        <p className="text-gray-600 dark:text-gray-300 mb-6">
+        <p className="text-gray-600 dark:text-gray-300">
           For the best experience, download our mobile app. Connect with friends, share moments, and build meaningful bonds on the go.
         </p>
         
         {/* App store buttons */}
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+        <div className="flex flex-row justify-center items-center gap-4">
           <Link to="#" className="transform transition-all hover:scale-105">
             <img 
               src="/assets/stores/appstore.svg" 

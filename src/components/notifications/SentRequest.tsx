@@ -72,7 +72,7 @@ const SentRequest = ({
 
   return (
     <div
-      className="flex items-start gap-3 p-4 rounded-lg border border-border hover:bg-accent/30 transition-colors cursor-pointer"
+      className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-accent/30 transition-colors cursor-pointer"
       onClick={viewProfile}
     >
       <Avatar className="h-12 w-12">
@@ -85,6 +85,7 @@ const SentRequest = ({
           <h4 className="font-medium text-foreground truncate">{name}</h4>
           <TruncatedText
             text={bio}
+            align="left"
             limit={40}
             showToggle={false}
           />

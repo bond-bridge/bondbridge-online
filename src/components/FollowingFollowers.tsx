@@ -138,7 +138,7 @@ const FollowingFollowers = ({ sidebar = false }: FollowingFollowersProps) => {
                   <span className={cn(
                     "font-medium text-foreground truncate",
                     sidebar && "text-sm"
-                  )}>{sidebar ? user.name.length > 20 ? `${user.name.substring(0, 20)}...` : user.name : user.name}</span>
+                  )}>{sidebar ? user.name.length > 20 ? `${user.name.substring(0, 16)}...` : user.name : user.name}</span>
                   {!sidebar && (
                     <TruncatedText 
                       text={user.bio} 

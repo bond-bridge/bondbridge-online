@@ -34,6 +34,7 @@ const SearchResults = ({ person }: Props) => {
             limit={65}
             className="text-sm text-muted-foreground"
             showToggle={false}
+            align="left"
           />
         </div>
       </div>

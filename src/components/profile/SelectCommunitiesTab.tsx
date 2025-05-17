@@ -83,7 +83,7 @@ const SelectCommunitiesTab: React.FC = () => {
       <h1 className="text-3xl font-medium mb-1 text-foreground">Let's Join Exciting Communities</h1>
       <p className="text-muted-foreground mb-8">Select Communities</p>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-[45vh] overflow-y-auto">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 md:gap-4 gap-6 max-h-[45vh] overflow-y-auto">
         {communities.map((community) => (
           <div 
             key={community._id}
