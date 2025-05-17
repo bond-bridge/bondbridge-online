@@ -177,7 +177,6 @@ const ForgotPassword: React.FC = () => {
             countryCode: validCountryCode,
             forgot: '1'
         });
-        console.log("result", result);
         if (result.success && result.data) {
             // For testing purposes - extract OTP from response
             // In a production environment, this would come via SMS

@@ -113,7 +113,6 @@ const SetupProfile: React.FC = () => {
     });
     
     if (result.success && result.data) {
-      console.log(result.data);
       
       // Now set the password
       const passwordResult = await executeSetPassword({
