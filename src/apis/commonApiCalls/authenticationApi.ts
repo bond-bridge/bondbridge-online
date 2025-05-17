@@ -43,10 +43,7 @@ export const sendOTP = async (phoneData: SendOTPRequest): Promise<SendOTPRespons
   
   const response = await apiClient.post<SendOTPResponse>(`/send-otp`, requestBody);
 
-  console.log("response", response);
-  
   if (response.status === 200) {
-    console.log(response.data);
     return response.data;
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -72,7 +69,6 @@ export const verifyOTP = async (otpData: VerifyOTPRequest): Promise<VerifyOTPRes
   const response = await apiClient.post<VerifyOTPResponse>(`/verify-otp`, requestBody);
   
   if (response.status === 200) {
-    console.log(response.data);
     
     // Store token and userId in localStorage
     if (response.data.token && response.data.userDetails?._id) {
@@ -103,7 +99,6 @@ export const loginUser = async (loginData: LoginRequest): Promise<LoginResponse>
   });
   
   if (response.status === 200) {
-    console.log(response.data);
     
     if (response.data.token && response.data.userDetails?._id && response.data.userDetails.statusCode != 0) {
       localStorage.setItem('socketToken', response.data.socketToken)
