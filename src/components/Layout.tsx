@@ -34,6 +34,7 @@ const Layout: React.FC<LayoutProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem("token");
   const activeChat = useAppSelector((state) => state.chat.activeChat);
   const currentUserId = localStorage.getItem("userId") || "";
   const currentUser = useAppSelector((state) => state.currentUser);
@@ -82,7 +83,7 @@ const Layout: React.FC<LayoutProps> = ({
       setIsLoadingProfile(false);
     }
 
-  }, [currentUserId, dispatch, currentUser]);
+  }, [currentUserId, dispatch, currentUser, isLoggedIn]);
 
 
   useEffect(() => {
@@ -125,7 +126,7 @@ const Layout: React.FC<LayoutProps> = ({
     dispatch(setActiveChat(null));
   };
 
-  const isLoggedIn = localStorage.getItem("token");
+
   useEffect(() => {
     if (isLoadingProfile) {
       return;
@@ -147,7 +148,7 @@ const Layout: React.FC<LayoutProps> = ({
       console.log("navigating to login because user is not logged in and on setup profile");
       navigate("/login");
     }
-  }, [isLoggedIn, isLoadingProfile]);
+  }, [isLoggedIn, isLoadingProfile, currentPath, isUserReady]);
 
   // if (!isLoggedIn && !isPublicPath) {
   //   navigate("/login");
