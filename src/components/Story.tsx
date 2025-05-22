@@ -6,11 +6,9 @@ export const Story: FC<StoryProps> = ({
   user, 
   userId,
   avatar, 
-  isLive,
   hasStory,
   stories,
   latestStoryTime,
-  liveRingColor = 'ring-primary',
   defaultRingColor = 'ring-muted',
   unseenRingColor = 'ring-blue-500',
   allStories = [],
@@ -31,7 +29,6 @@ export const Story: FC<StoryProps> = ({
           userId,
           avatar,
           profilePic,
-          isLive,
           hasStory,
           stories,
           latestStoryTime
@@ -59,22 +56,15 @@ export const Story: FC<StoryProps> = ({
       tabIndex={0}
     >
       <div className={`relative w-16 h-16 rounded-full cursor-pointer ${
-        isLive 
-          ? `ring-2 ${liveRingColor}` 
-          : hasUnseenStories
-            ? `ring-2 ${unseenRingColor}`
-            : `ring-2 ${defaultRingColor}`
+        hasUnseenStories
+          ? `ring-2 ${unseenRingColor}`
+          : `ring-2 ${defaultRingColor}`
       }`}>
         <img 
           src={profilePic || avatar} 
           alt={user} 
           className="w-full h-full rounded-full object-cover p-[2px] bg-background"
         />
-        {isLive && (
-          <span className={`absolute bottom-0 text-[10px] text-background ${liveRingColor.split(' ')[0]} px-2 rounded-full left-1/2 -translate-x-1/2`}>
-            live
-          </span>
-        )}
       </div>
       <span className="text-xs text-muted-foreground" title={user}>{truncateUsername(user)}</span>
     </div>
