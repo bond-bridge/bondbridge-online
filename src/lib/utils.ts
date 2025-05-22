@@ -27,7 +27,7 @@ export function getRelativeTime(timestamp: string | Date): string {
   const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
   
   if (isNaN(date.getTime())) {
-    return 'Invalid date';
+    return 'Just now';
   }
   
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
@@ -39,7 +39,7 @@ export function getRelativeTime(timestamp: string | Date): string {
   const years = Math.floor(days / 365);
   
   if (seconds < 60) {
-    return `${seconds}s ago`;
+    return `Just now`;
   } else if (minutes < 60) {
     return `${minutes}m ago`;
   } else if (hours < 24) {
