@@ -254,7 +254,6 @@ export interface StoryData {
   userId: string;
   name: string;
   profilePic: string;
-  isLive: boolean;
   hasStory: boolean;
   latestStoryTime: number;
   stories: Array<{
