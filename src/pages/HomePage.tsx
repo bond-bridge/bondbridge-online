@@ -94,7 +94,6 @@ export default function HomePage() {
 
       // Then fetch homepage data
       const result = await executeFetchHomepageData(1);
-      console.log("result", result)
 
       if (result.success && result.data) {
         const { postsData, storiesData } = result.data as HomepageResponse;
