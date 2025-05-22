@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   Popover,
   PopoverContent,
@@ -8,13 +8,18 @@ import {
 } from "@/components/ui/popover";
 import { useAppDispatch } from "@/store";
 import { resetUser } from "@/store/currentUserSlice";
+import { addNewUnseenNotification, ApiNotification } from "@/store/notificationsSlice";
 import { LogOut } from "lucide-react";
 import { useSocket } from "@/context/SocketContext";
+
 const LeftSidebar: React.FC = () => {
-  const pathname = window.location.pathname;
+  const location = useLocation();
+  const pathname = location.pathname;
   const dispatch = useAppDispatch();
 
   const { socket } = useSocket();
+
+  const [showNotificationDot, setShowNotificationDot] = useState(false);
 
   useEffect(() => {
     console.log("Tried pinging");
@@ -27,12 +32,42 @@ const LeftSidebar: React.FC = () => {
     }
   }, [socket]);
 
+  useEffect(() => {
+    if (socket) {
+      console.log("LeftSidebar: Setting up socket listeners");
+
+      const handleNewNotification = (notification: ApiNotification) => {
+        console.log("LeftSidebar: New notification received", notification);
+        dispatch(addNewUnseenNotification(notification));
+
+        if (location.pathname !== "/notifications") {
+          setShowNotificationDot(true);
+        }
+      };
+
+      socket.on("newNotification", handleNewNotification);
+
+      return () => {
+        console.log("LeftSidebar: Cleaning up socket listeners");
+        socket.off("newNotification", handleNewNotification);
+      };
+    }
+  }, [socket, dispatch, location.pathname]);
+
+  useEffect(() => {
+    if (pathname === "/notifications") {
+      setShowNotificationDot(false);
+    }
+  }, [pathname]);
+
   const handleLogout = () => {
     dispatch(resetUser());
     localStorage.removeItem("userId");
     localStorage.removeItem("token");
     window.location.href = "/login";
   };
+
+  
 
   return (
     <div className="col-span-2 border-r border-border  text-xl flex flex-col h-[calc(100vh-64px)]">
@@ -79,13 +114,18 @@ const LeftSidebar: React.FC = () => {
             <Link
               to="/notifications"
               className={`flex items-center space-x-3 hover:text-foreground transition-colors ${pathname === "/notifications"
-                  ? "font-medium text-foreground"
-                  : ""
+                ? "font-medium text-foreground"
+                : ""
                 }`}
             >
-              <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z" />
-              </svg>
+              <div className="relative">
+                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z" />
+                </svg>
+                {showNotificationDot  && (
+                  <span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-background" />
+                )}
+              </div>
               <span>Notifications</span>
             </Link>
           </li>

@@ -11,6 +11,7 @@ import {
   fetchSentRequests,
   markNotificationAsSeen,
   clearAllNotifications,
+  deleteNotification,
 } from "@/apis/commonApiCalls/notificationsApi";
 import { useApiCall } from "@/apis/globalCatchError";
 import LogoLoader from "@/components/LogoLoader";
@@ -18,35 +19,19 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Bell, UserPlus, AlertCircle, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { AppDispatch, useAppDispatch, useAppSelector } from "@/store";
+import {
+  setInitialNotifications,
+  setMoreNotifications,
+  markAsSeenInStore,
+  deleteNotificationFromStore,
+  clearAllStoredNotifications,
+  revertNotificationDeletion,
+  setUnseenCountOnly,
+  ApiNotification
+} from "@/store/notificationsSlice";
 
-// Define the actual notification structure from the API
-interface ApiNotification {
-  _id: string;
-  type: string;
-  sender: {
-    id: string;
-    name: string;
-    profilePic: string;
-  };
-  receiverId: string;
-  details: {
-    notificationText: string;
-    notificationImage: string;
-    entityType: string;
-    entityId: string;
-    headerId: string;
-    entity: {
-      _id: string;
-      feedId?: string;
-      [key: string]: unknown;
-    };
-    content: string | null;
-  };
-  timestamp: string;
-  seen: boolean;
-}
-
-// New interface to match the updated API response structure
+// New interface to match the updated API response structure for notifications
 interface UpdatedNotificationsResponse {
   success: boolean;
   message: string;
@@ -62,11 +47,14 @@ interface UpdatedNotificationsResponse {
 }
 
 const Notifications = () => {
-  const [unseenNotifications, setUnseenNotifications] = useState<ApiNotification[]>([]);
-  const [seenNotifications, setSeenNotifications] = useState<ApiNotification[]>([]);
+  const dispatch: AppDispatch = useAppDispatch();
+  const { unseenNotifications, seenNotifications, unseenCount } = useAppSelector(
+    (state) => state.notifications
+  );
+
+  // Local states for non-notification data
   const [friendRequests, setFriendRequests] = useState<FollowRequest[]>([]);
   const [sentRequests, setSentRequests] = useState<FollowRequest[]>([]);
-  const [unseenCount, setUnseenCount] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -76,65 +64,55 @@ const Notifications = () => {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const scrollPositionRef = useRef<number>(0);
-  const notificationsContainerRef = useRef<HTMLDivElement>(null);
 
   const [executeNotificationsFetch, isLoadingNotifications] = useApiCall(fetchNotifications);
   const [executeFollowRequestsFetch, isLoadingFollowRequests] = useApiCall(fetchFollowRequests);
   const [executeSentRequestsFetch, isLoadingSentRequests] = useApiCall(fetchSentRequests);
-  const [executeMarkAsSeen] = useApiCall(markNotificationAsSeen);
-  const [executeClearAll] = useApiCall(clearAllNotifications);
+  const [executeMarkAsSeenAPI] = useApiCall(markNotificationAsSeen);
+  const [executeClearAllAPI] = useApiCall(clearAllNotifications);
+  const [executeDeleteAPI] = useApiCall(deleteNotification);
 
-  // Only show full screen loader on initial load
   const isInitialLoading = isLoadingNotifications && page === 1 && !isFetchingMore;
   const isLoading = isLoadingFollowRequests || isLoadingSentRequests || isInitialLoading;
 
   const handleMarkAsSeen = async (notificationId: string) => {
-    const result = await executeMarkAsSeen(notificationId);
+    dispatch(markAsSeenInStore(notificationId));
     
-    if (result.success) {
-      // Move the notification from unseen to seen
-      const notificationToMove = unseenNotifications.find(n => n._id === notificationId);
-      if (notificationToMove) {
-        const updatedNotification = { ...notificationToMove, seen: true };
-        setUnseenNotifications(prev => prev.filter(n => n._id !== notificationId));
-        setSeenNotifications(prev => [updatedNotification, ...prev]);
-        // Decrement unseen count
-        setUnseenCount(prev => Math.max(0, prev - 1));
-      }
+    const result = await executeMarkAsSeenAPI(notificationId);
+    
+    if (!result.success) {
+      toast.error("Failed to mark notification as seen. Please try again.");
     }
   };
 
-  // Handle optimistic notification deletion
-  const handleDeleteNotification = (notificationId: string) => {
-    // Check if the notification is unseen before removing
-    const isUnseen = unseenNotifications.some(n => n._id === notificationId);
-    if (isUnseen) {
-      setUnseenCount(prev => Math.max(0, prev - 1));
-    }
+  const handleDeleteNotification = async (notificationToDelete: ApiNotification) => {
+    const { _id} = notificationToDelete;
     
-    // Optimistically remove the notification from both unseen and seen lists
-    setUnseenNotifications(prev => prev.filter(n => n._id !== notificationId));
-    setSeenNotifications(prev => prev.filter(n => n._id !== notificationId));
+    dispatch(deleteNotificationFromStore(_id));
+    
+    const result = await executeDeleteAPI(_id);
+    
+    if (!result.success) {
+      dispatch(revertNotificationDeletion(notificationToDelete));
+      toast.error("Failed to delete notification. Please try again.");
+    }
   };
 
   const handleClearAll = async () => {
-    // Store current state for potential rollback
     const originalUnseen = [...unseenNotifications];
     const originalSeen = [...seenNotifications];
     const originalUnseenCount = unseenCount;
 
-    // Optimistically clear notifications
-    setUnseenNotifications([]);
-    setSeenNotifications([]);
-    setUnseenCount(0);
+    dispatch(clearAllStoredNotifications());
 
-    const result = await executeClearAll();
-    if (result.status === 404 || !result.success) {
-      // Revert to original state on error
+    const result = await executeClearAllAPI();
+    if (!result.success || result.status === 404) {
+      dispatch(setInitialNotifications({ 
+        unseenItems: originalUnseen, 
+        seenItems: originalSeen, 
+        initialUnseenCount: originalUnseenCount 
+      }));
       toast.error("Failed to Clear Notifications");
-      setUnseenNotifications(originalUnseen);
-      setSeenNotifications(originalSeen);
-      setUnseenCount(originalUnseenCount);
     }
   };
 
@@ -143,107 +121,77 @@ const Notifications = () => {
   };
 
   const restoreScrollPosition = () => {
-    // Use requestAnimationFrame to ensure the DOM has updated
     requestAnimationFrame(() => {
       window.scrollTo(0, scrollPositionRef.current);
     });
   };
 
   const loadData = async (currentPage = 1, append = false) => {
-    // If appending data, save current scroll position
-    if (append) {
-      saveScrollPosition();
-    }
+    if (append) saveScrollPosition();
     
-    // Fetch notifications with pagination
     const notificationsResult = await executeNotificationsFetch({
       page: currentPage,
       limit: 10,
     });
     
     if (notificationsResult.success && notificationsResult.data?.success) {
-      // Cast the response to our updated interface
       const response = notificationsResult.data as unknown as UpdatedNotificationsResponse;
       
       if (response.data) {
-        // Set unseen count from API response
-        if (!append) {
-          setUnseenCount(response.data.unseenCount);
-        }
-        
-        // Filter out notifications of type "call"
         const filteredUnseen = Array.isArray(response.data.unseen) 
-          ? response.data.unseen.filter(notification => notification.type !== "call")
-          : [];
-          
+          ? response.data.unseen.filter(n => n.type !== "call") : [];
         const filteredSeen = Array.isArray(response.data.seen)
-          ? response.data.seen.filter(notification => notification.type !== "call") 
-          : [];
+          ? response.data.seen.filter(n => n.type !== "call") : [];
         
         if (append) {
-          // Append new notifications to existing ones
-          setUnseenNotifications(prev => [...prev, ...filteredUnseen]);
-          setSeenNotifications(prev => [...prev, ...filteredSeen]);
-          
-          // Restore scroll position after state update
-          setTimeout(restoreScrollPosition, 0);
+          dispatch(setMoreNotifications({ unseenItems: filteredUnseen, seenItems: filteredSeen }));
         } else {
-          // Replace existing notifications
-          setUnseenNotifications(filteredUnseen);
-          setSeenNotifications(filteredSeen);
+          dispatch(setInitialNotifications({ 
+            unseenItems: filteredUnseen, 
+            seenItems: filteredSeen, 
+            initialUnseenCount: response.data.unseenCount 
+          }));
         }
         
-        // Check if there are more notifications to load
-        const totalNotifications = filteredUnseen.length + filteredSeen.length;
-        // If both arrays are empty, there's nothing more to load
-        setHasMore(totalNotifications > 0 && 
-                  (response.data.currentPage < response.data.totalPages || 
-                   response.data.hasMore === true));
+        setHasMore(response.data.hasMore || response.data.currentPage < response.data.totalPages);
+        if (!append) {
+          dispatch(setUnseenCountOnly(response.data.unseenCount));
+        }
+
       } else {
         if (!append) {
-          setUnseenNotifications([]);
-          setSeenNotifications([]);
-          setUnseenCount(0);
+          dispatch(setInitialNotifications({ unseenItems: [], seenItems: [], initialUnseenCount: 0 }));
         }
         setHasMore(false);
       }
       setError(null);
     } else {
       if (!append) {
-        setUnseenNotifications([]);
-        setSeenNotifications([]);
-        setUnseenCount(0);
+        dispatch(setInitialNotifications({ unseenItems: [], seenItems: [], initialUnseenCount: 0 }));
       }
       setHasMore(false);
       setError(notificationsResult.data?.message || "Failed to load notifications");
     }
 
-    if (append) {
-      // Restore scroll position again after all state updates
-      setTimeout(restoreScrollPosition, 50);
-    }
+    if (append) setTimeout(restoreScrollPosition, 0);
 
-    // Fetch follow requests with pagination
-    const followRequestsResult = await executeFollowRequestsFetch({
-      page: 1,
-      limit: 10,
-    });
+    const followRequestsResult = await executeFollowRequestsFetch({ page: 1, limit: 10 });
     if (followRequestsResult.success && followRequestsResult.data) {
       setFriendRequests(followRequestsResult.data.result.filter((request: FollowRequest) => request) || []);
     } else {
       setFriendRequests([]);
     }
 
-    // Fetch sent requests
     const sentRequestsResult = await executeSentRequestsFetch();
     if (sentRequestsResult.success && sentRequestsResult.data) {
       setSentRequests(sentRequestsResult.data.result.filter((request: FollowRequest) => request) || []);
     } else {
       setSentRequests([]);
     }
+    
+    if (append) setTimeout(restoreScrollPosition, 50);
   };
 
-  // Load more notifications when user scrolls to the bottom
   const loadMoreNotifications = useCallback(async () => {
     if (!hasMore || isLoadingNotifications || isFetchingMore || activeTab !== "notifications") return;
     
@@ -258,89 +206,63 @@ const Notifications = () => {
       console.error("Error loading more notifications:", error);
     } finally {
       setIsFetchingMore(false);
-      // Ensure scroll position is maintained after loading completes
       setTimeout(restoreScrollPosition, 100);
     }
-  }, [page, hasMore, isLoadingNotifications, isFetchingMore, activeTab]);
+  }, [page, hasMore, isLoadingNotifications, isFetchingMore, activeTab, dispatch]);
 
-  // Set up IntersectionObserver for infinite scrolling
   useEffect(() => {
-    // Clean up previous observer if it exists
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-      observerRef.current = null;
-    }
-    
-    // Only set up observer if we have more content to load and we're not already loading
+    if (observerRef.current) observerRef.current.disconnect();
     if (!hasMore || isLoading || isFetchingMore || !loadMoreRef.current || activeTab !== "notifications") return;
     
     observerRef.current = new IntersectionObserver(
       (entries) => {
-        const [entry] = entries;
-        if (entry.isIntersecting && hasMore && !isLoadingNotifications && !isFetchingMore) {
-          loadMoreNotifications();
-        }
+        if (entries[0].isIntersecting) loadMoreNotifications();
       },
       { threshold: 0.1, rootMargin: "100px" }
     );
     
-    if (loadMoreRef.current) {
-      observerRef.current.observe(loadMoreRef.current);
-    }
-    
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, [hasMore, isLoading, isLoadingNotifications, isFetchingMore, loadMoreNotifications, activeTab]);
+    observerRef.current.observe(loadMoreRef.current);
+    return () => observerRef.current?.disconnect();
+  }, [hasMore, isLoading, isFetchingMore, loadMoreNotifications, activeTab]);
 
   useEffect(() => {
-    // Reset page when tab changes
     setPage(1);
     setHasMore(true);
-    
-    // Load initial data
-    loadData();
-  }, []);
+    loadData(1, false);
+  }, [dispatch]);
 
-  const handleFriendRequestAction = async (
-    requestId: string,
-    success: boolean
-  ) => {
+  const handleFriendRequestAction = (requestId: string, success: boolean) => {
     if (success) {
-      // If the action was successful, keep the request removed
       setFriendRequests((prev) => prev.filter((req) => req._id !== requestId));
     } else {
-      // If the action failed, add the request back
-      const failedRequest = friendRequests.find((req) => req._id === requestId);
-      if (failedRequest) {
-        setFriendRequests((prev) => [...prev, failedRequest]);
-      }
+      toast.error("Action failed. Please try again.");
     }
   };
 
-  const handleSentRequestAction = async (
-    requestId: string,
-    success: boolean
-  ) => {
+  const handleSentRequestAction = (requestId: string, success: boolean) => {
     if (success) {
-      // If the action was successful, remove the request from the list
       setSentRequests((prev) => prev.filter((req) => req._id !== requestId));
-    } 
+    } else {
+      toast.error("Failed to cancel request. Please try again.");
+    }
   };
 
   const handleRefresh = () => {
     setPage(1);
     setHasMore(true);
-    loadData();
+    setError(null);
+    loadData(1, false);
   };
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
+    setPage(1);
+    setHasMore(true);
+    if (value === "notifications") {
+      loadData(1, false);
+    }
   };
 
-  // Get total notifications count
   const totalNotificationsCount = unseenNotifications.length + seenNotifications.length;
 
   return (
@@ -366,23 +288,20 @@ const Notifications = () => {
         />
       ) : (
         <Tabs defaultValue="notifications" className="" onValueChange={handleTabChange}>
-          <TabsList className="grid grid-cols-3  ">
-            <TabsTrigger value="notifications" className="cursor-pointer ">
-              Notifications{" "}
-              {unseenCount > 0 && `(${unseenCount})`}
+          <TabsList className="grid grid-cols-3">
+            <TabsTrigger value="notifications" className="cursor-pointer">
+              Notifications {unseenCount > 0 && `(${unseenCount})`}
             </TabsTrigger>
             <TabsTrigger value="friend-requests" className="cursor-pointer">
-              Friend Requests{" "}
-              {friendRequests.length > 0 && `(${friendRequests.length})`}
+              Friend Requests {friendRequests.length > 0 && `(${friendRequests.length})`}
             </TabsTrigger>
             <TabsTrigger value="requests-sent" className="cursor-pointer">
-              Sent Requests{" "}
-              {sentRequests.length > 0 && `(${sentRequests.length})`}
+              Sent Requests {sentRequests.length > 0 && `(${sentRequests.length})`}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="notifications" className="mt-4">
-            <div className="space-y-4" ref={notificationsContainerRef}>
+            <div className="space-y-4">
               {totalNotificationsCount > 0 ? (
                 <>
                   <div className="flex justify-end">
@@ -399,25 +318,20 @@ const Notifications = () => {
                     <Notification
                       key={notification._id}
                       _id={notification._id}
-                      type={notification.type}
                       title={notification.sender.name}
-                      content={notification.details.notificationText || notification.details.content || ""}
                       profilePic={notification.sender.profilePic}
                       avatar={notification.sender.profilePic}
                       timestamp={notification.timestamp}
                       seen={notification.seen}
-                      onMarkAsSeen={handleMarkAsSeen}
-                      onDelete={handleDeleteNotification}
+                      onMarkAsSeen={() => handleMarkAsSeen(notification._id)}
+                      onDelete={() => handleDeleteNotification(notification)}
+                      entityDetails={notification.details}
                       senderId={notification.sender.id}
-                      entityDetails={{
-                        entityType: notification.details.entityType,
-                        entityId: notification.details.entityId,
-                        entity: notification.details.entity
-                      }}
+                      type={notification.type}
+                      content={notification.details.content || ""}
                     />
                   ))}
                   
-                  {/* Load more indicator at the bottom */}
                   <div ref={loadMoreRef} className="flex justify-center py-4">
                     {isFetchingMore && (
                       <div className="flex items-center gap-2 text-muted-foreground">
