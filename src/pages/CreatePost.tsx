@@ -366,22 +366,22 @@ const CreatePost = ({
     try {
       // Check for video files exceeding 10MB limit
       const invalidFiles = files.filter(
-        (file) => file.type.startsWith("video/") && file.size > 25 * 1024 * 1024
+        (file) => file.type.startsWith("video/") && file.size > 50 * 1024 * 1024
       );
 
       if (invalidFiles.length > 0) {
-        toast.error("Videos must be less than 25MB in size");
+        toast.error("Videos must be less than 50MB in size");
         setIsUploading(false);
         return;
       }
 
       // Check for image files exceeding 10MB limit
       const invalidImageFiles = files.filter(
-        (file) => file.type.startsWith("image/") && file.size > 25 * 1024 * 1024
+        (file) => file.type.startsWith("image/") && file.size > 50 * 1024 * 1024
       );
 
       if (invalidImageFiles.length > 0) {
-        toast.error("Images must be less than 25MB in size");
+        toast.error("Images must be less than 50MB in size");
         setIsUploading(false);
         return;
       }
