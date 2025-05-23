@@ -4,7 +4,6 @@ import { GET_AUTH_HEADERS } from "@/lib/constants";
 // Create an Axios instance
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
-  timeout: 10000, // Adjust timeout as needed
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -51,7 +50,6 @@ apiClient.interceptors.response.use(
 // For multipart form data requests
 export const formDataApiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
-  timeout: 10000,
   headers: {
     "Content-Type": "multipart/form-data",
     Accept: "application/json",
@@ -61,7 +59,6 @@ export const formDataApiClient = axios.create({
 // For multipart form data requests
 export const communityFormDataApiClient = axios.create({
   baseURL: import.meta.env.VITE_API_ADMIN_BASE_URL || "/api",
-  timeout: 10000,
   headers: {
     "Content-Type": "multipart/form-data",
     Accept: "application/json",
@@ -92,7 +89,6 @@ export const adminApiClient = axios.create({
   baseURL:
     import.meta.env.VITE_API_ADMIN_BASE_URL ||
     "https://bondbridge-admin-panel.vercel.app/api",
-  timeout: 10000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
