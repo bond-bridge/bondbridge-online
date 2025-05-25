@@ -18,7 +18,7 @@ const PrivacyPolicy: React.FC = () => {
       if (window.history.length > 1) {
         navigate(-1); // Go back in browser history
       } else {
-        navigate("/signup"); // Default fallback
+        navigate("/"); // Default fallback
       }
     }
   };
