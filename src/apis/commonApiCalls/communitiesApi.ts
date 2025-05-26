@@ -72,9 +72,6 @@ export const fetchCommunities = async (params?: FetchCommunitiesRequest): Promis
   return response.data.communities;
 };
 
-
-
-
 /**
  * Function to fetch communities where the current user is a member
  * @returns Promise with community response array
@@ -87,10 +84,8 @@ export const fetchUserCommunities = async (): Promise<CommunityResponse[]> => {
   
   const communities = await fetchCommunities();
   
-  // Filter communities where the user is a member
-  return communities.filter(community => 
-    community.members && community.members.includes(userId)
-  );
+  // Filter communities where isJoined is true
+  return communities.filter(community => community.isJoined);
 };
 
 /**
