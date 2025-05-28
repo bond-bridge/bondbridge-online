@@ -1,9 +1,27 @@
 import React from "react";
 import { ChevronLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const PrivacyPolicy: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleBackClick = () => {
+    // Check if there's a previous route stored in location state
+    const previousRoute = location.state?.from;
+    
+    if (previousRoute) {
+      // Navigate to the previous route
+      navigate(previousRoute);
+    } else {
+      // Fallback to browser history or default route
+      if (window.history.length > 1) {
+        navigate(-1); // Go back in browser history
+      } else {
+        navigate("/"); // Default fallback
+      }
+    }
+  };
 
   return (
     <div className="h-[100vh] relative overflow-y-auto pb-10 league-font">
@@ -12,7 +30,7 @@ const PrivacyPolicy: React.FC = () => {
 
       {/* Back button */}
       <button
-        onClick={() => navigate("/signup")}
+        onClick={handleBackClick}
         className="absolute top-6 left-6 flex items-center gap-1 text-foreground hover:text-muted-foreground transition-colors cursor-pointer"
       >
         <ChevronLeft className="h-5 w-5" />

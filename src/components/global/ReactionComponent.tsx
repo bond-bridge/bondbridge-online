@@ -264,12 +264,12 @@ const ReactionComponent = ({
   }, [initialReactionCounts]);
 
   // For community posts, fetch reaction data on mount
-  useEffect(() => {
-    if (isCommunity && entityId && !isReactionsLoaded) {
-      shouldFetchRef.current = true;
-      fetchReactionData();
-    }
-  }, [isCommunity, entityId, isReactionsLoaded, fetchReactionData]);
+  // useEffect(() => {
+  //   if (isCommunity && entityId && !isReactionsLoaded) {
+  //     shouldFetchRef.current = true;
+  //     fetchReactionData();
+  //   }
+  // }, [isCommunity, entityId, isReactionsLoaded, fetchReactionData]);
 
   // When entityId changes, reset the loaded state to allow refetching
   useEffect(() => {
@@ -367,63 +367,93 @@ const ReactionComponent = ({
           throw new Error("Community ID is required for community posts");
         }
         
-        // The community API handles both add and remove reactions
-        const result = await executeReactOnPost(communityId as string, {
-          postId: entityId,
-          reactionType: reactionType
-        });
-        if (result.success && result.data) {
-          // Process the response and update the state
-          const postData = result.data;
-          const reactionDetails = postData.reactionDetails as PostReactionData;
-          
-          // Update counts from API response
-          setReactionCounts({
-            like: reactionDetails.types.like || 0,
-            love: reactionDetails.types.love || 0,
-            haha: reactionDetails.types.haha || 0,
-            lulu: reactionDetails.types.lulu || 0
+        // First remove the previous reaction if it exists
+        if (currentReaction) {
+          const removeResult = await executeReactOnPost(communityId as string, {
+            postId: entityId,
+            reactionType: currentReaction
           });
-          
-          setTotalCount(reactionDetails.total || 0);
-          
-          // Update current reaction
-          if (postData.reaction) {
-            const postReaction = postData.reaction as PostReaction;
-            setCurrentReaction(postReaction.hasReacted ? 
-              postReaction.reactionType as ReactionType : null);
+          if (!removeResult.success) {
+            throw new Error("Failed to remove previous reaction");
+          }
+        }
+        
+        // Then add the new reaction if it's different from the current one
+        if (!isSameReaction) {
+          const result = await executeReactOnPost(communityId as string, {
+            postId: entityId,
+            reactionType: reactionType
+          });
+          if (result.success && result.data) {
+            // Process the response and update the state
+            const postData = result.data;
+            const reactionDetails = postData.reactionDetails as PostReactionData;
             
-            // Notify parent component about the change
-            if (onReactionChange) {
-              onReactionChange(
-                postReaction.hasReacted,
-                postReaction.reactionType
-              );
+            // Update counts from API response
+            setReactionCounts({
+              like: reactionDetails.types.like || 0,
+              love: reactionDetails.types.love || 0,
+              haha: reactionDetails.types.haha || 0,
+              lulu: reactionDetails.types.lulu || 0
+            });
+            
+            setTotalCount(reactionDetails.total || 0);
+            
+            // Update current reaction
+            if (postData.reaction) {
+              const postReaction = postData.reaction as PostReaction;
+              setCurrentReaction(postReaction.hasReacted ? 
+                postReaction.reactionType as ReactionType : null);
+              
+              // Notify parent component about the change
+              if (onReactionChange) {
+                onReactionChange(
+                  postReaction.hasReacted,
+                  postReaction.reactionType
+                );
+              }
             }
+            
+            // Fetch fresh reaction data to update users list
+            fetchReactionData();
+          } else {
+            // Revert UI changes if API call fails
+            setCurrentReaction(wasReacted ? currentReaction : null);
+            setTotalCount(oldTotal);
+            
+            // Revert reaction counts
+            setReactionCounts(prev => {
+              const currentCounts = { ...prev };
+              if (isSameReaction) {
+                currentCounts[reactionType] += 1;
+              } else if (wasReacted && currentReaction) {
+                currentCounts[reactionType] -= 1;
+                currentCounts[currentReaction] += 1;
+              } else {
+                currentCounts[reactionType] -= 1;
+              }
+              return currentCounts;
+            });
+            
+            toast.error("Failed to update reaction");
+          }
+        } else {
+          // If we're just removing the reaction (isSameReaction is true)
+          // The first API call already handled it, so we can update the UI
+          setCurrentReaction(null);
+          setTotalCount(Math.max(0, totalCount - 1));
+          setReactionCounts(prev => ({
+            ...prev,
+            [reactionType]: Math.max(0, prev[reactionType] - 1)
+          }));
+          
+          // Notify parent component about the change
+          if (onReactionChange) {
+            onReactionChange(false, null);
           }
           
           // Fetch fresh reaction data to update users list
           fetchReactionData();
-        } else {
-          // Revert UI changes if API call fails
-          setCurrentReaction(wasReacted ? currentReaction : null);
-          setTotalCount(oldTotal);
-          
-          // Revert reaction counts
-          setReactionCounts(prev => {
-            const currentCounts = { ...prev };
-            if (isSameReaction) {
-              currentCounts[reactionType] += 1;
-            } else if (wasReacted && currentReaction) {
-              currentCounts[reactionType] -= 1;
-              currentCounts[currentReaction] += 1;
-            } else {
-              currentCounts[reactionType] -= 1;
-            }
-            return currentCounts;
-          });
-          
-          toast.error("Failed to update reaction");
         }
       } else {
         // For non-community content
