@@ -346,9 +346,6 @@ const Login: React.FC = () => {
                 </Link>
               </div>
             </div>
-            <div className="text-4xl font-bold relative text-foreground -top-10 animate-pulse">
-              Coming Soon
-            </div>
           </div>
         </form>
       </AuthLayout>
