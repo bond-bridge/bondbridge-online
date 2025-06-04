@@ -708,6 +708,7 @@ export interface CommunityResponse {
     profilePic: string;
     avatar: string;
   }[];
+  isJoined?: boolean;
 }
 
 export interface CommunitiesResponse {

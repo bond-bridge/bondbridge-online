@@ -10,6 +10,7 @@ import { useApiCall } from "../apis/globalCatchError";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { CustomPhoneInput } from "@/components/ui/custom-phone-input";
+import { toast } from "sonner";
 
 
 const Signup: React.FC = () => {
@@ -116,6 +117,9 @@ const Signup: React.FC = () => {
       //   dispatch(updateCurrentUser(userData.data));
       // }
       navigate("/setup-profile");
+    }
+    else{
+      toast.error("Invalid OTP");
     }
   };
 
@@ -252,7 +256,7 @@ const Signup: React.FC = () => {
                       className="w-40"
                     />
                   </Link>
-                  <Link to="#" className="">
+                  <Link to="https://play.google.com/store/apps/details?id=com.bondbridge.bondbridgeonline" className="">
                     <img
                       src="/assets/stores/googleplay.svg"
                       alt="Get it on Google Play"
@@ -261,14 +265,11 @@ const Signup: React.FC = () => {
                   </Link>
                 </div>
               </div>
-              <div className="text-4xl font-bold relative text-foreground -top-10 animate-pulse">
-                Coming Soon
-              </div>
             </div>
           </form>
         ) : (
           <div className="space-y-4">
-            <div className="text-center mb-4">
+            <div className="mb-4">
               <p className="text-sm text-muted-foreground">
                 We've sent a verification code to your phone
               </p>
@@ -282,12 +283,6 @@ const Signup: React.FC = () => {
                 } as React.FormEvent)
               }
             />
-            <button
-              onClick={() => setShowOTP(false)}
-              className="mt-4 text-foreground hover:underline w-full text-center cursor-pointer"
-            >
-              Back
-            </button>
             {isVerifyingOTP && (
               <p className="text-center text-sm text-muted-foreground">
                 Verifying...

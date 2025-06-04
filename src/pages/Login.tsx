@@ -337,7 +337,7 @@ const Login: React.FC = () => {
                     className="w-40"
                   />
                 </Link>
-                <Link to="#" className="">
+                <Link to="https://play.google.com/store/apps/details?id=com.bondbridge.bondbridgeonline" className="">
                   <img
                     src="/assets/stores/googleplay.svg"
                     alt="Get it on Google Play"
@@ -345,9 +345,6 @@ const Login: React.FC = () => {
                   />
                 </Link>
               </div>
-            </div>
-            <div className="text-4xl font-bold relative text-foreground -top-10 animate-pulse">
-              Coming Soon
             </div>
           </div>
         </form>
