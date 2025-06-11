@@ -1,6 +1,6 @@
 import React from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useNavigate } from 'react-router-dom';
+import { Link} from 'react-router-dom';
 
 // Define community interface matching BasicCommunity from Activity.tsx
 interface BasicCommunity {
@@ -18,20 +18,14 @@ interface SuggestedCommunitiesProps {
 }
 
 const SuggestedCommunities: React.FC<SuggestedCommunitiesProps> = ({ communities }) => {
-  const navigate = useNavigate();
-
-  const handleCommunityClick = (communityId: string) => {
-    navigate(`/community/${communityId}`);
-  };
-
   // No internal loading state anymore
   return (
     <div className="pl-4 gap-5 overflow-x-auto flex cursor-auto scrollbar-none">
       {communities.map((community) => (
-        <div 
+        <Link 
           key={community._id} 
           className="basis-[120px] cursor-pointer select-none"
-          onClick={() => handleCommunityClick(community._id)}
+          to={`/community/${community._id}`}
         >
           <div className="h-[180px] w-[120px] rounded-lg mb-2 relative overflow-hidden group">
             <img 
@@ -47,7 +41,7 @@ const SuggestedCommunities: React.FC<SuggestedCommunitiesProps> = ({ communities
               <span className='text-white text-sm font-bold truncate'>{community.name}</span>
             </div>
           </div>
-        </div>
+        </Link>
       ))}
       <div className="basis-[10px]"></div>
     </div>

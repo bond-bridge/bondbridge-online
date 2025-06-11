@@ -193,10 +193,9 @@ const CreateStory = () => {
   ) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Check file size (25MB = 25 * 1024 * 1024 bytes)
-      const maxSize = 25 * 1024 * 1024; // 25MB in bytes
+      const maxSize = 50 * 1024 * 1024; // 50MB in bytes
       if (file.size > maxSize) {
-        toast.error(`File ${file.name} exceeds maximum size of 25MB`);
+        toast.error(`File ${file.name} exceeds maximum size of 50MB`);
         return;
       }
       

@@ -32,7 +32,7 @@ const MobileAppDownload: React.FC = () => {
               className="h-40 sm:h-40"
             />
           </Link>
-          <Link to="#" className="transform transition-all hover:scale-105">
+          <Link to="https://play.google.com/store/apps/details?id=com.bondbridge.bondbridgeonline" className="transform transition-all hover:scale-105">
             <img 
               src="/assets/stores/googleplay.svg" 
               alt="Get it on Google Play" 

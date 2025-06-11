@@ -16,7 +16,6 @@ export interface StoryUser {
     user: string;
     userId: string;
     avatar: string;
-    isLive: boolean;
     hasStory: boolean;
     stories: StoryItem[];
     latestStoryTime: number;
@@ -27,7 +26,6 @@ export interface StoryProps {
     userId: string;
     avatar: string;
     profilePic?: string;
-    isLive: boolean;
     hasStory: boolean;
     stories: Array<{
       _id: string;
@@ -43,7 +41,6 @@ export interface StoryProps {
       seen: number;
     }>;
     latestStoryTime: number;
-    liveRingColor?: string;
     defaultRingColor?: string;
     unseenRingColor?: string;
     allStories?: StoryUser[]; // All stories from the homepage

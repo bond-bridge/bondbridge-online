@@ -254,7 +254,6 @@ export interface StoryData {
   userId: string;
   name: string;
   profilePic: string;
-  isLive: boolean;
   hasStory: boolean;
   latestStoryTime: number;
   stories: Array<{
@@ -709,6 +708,7 @@ export interface CommunityResponse {
     profilePic: string;
     avatar: string;
   }[];
+  isJoined?: boolean;
 }
 
 export interface CommunitiesResponse {

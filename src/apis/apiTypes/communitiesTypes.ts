@@ -72,6 +72,7 @@ export interface CommunityResponse {
   posts?: string[];
   members?: string[];
   memberDetails?: MemberDetail[];
+  isJoined?: boolean;
 }
 
 // Community Join Request

@@ -396,7 +396,6 @@ const Profile: React.FC<ProfileProps> = ({
             user: userStories.name,
             userId: userStories.userId,
             avatar: userStories.profilePic,
-            isLive: userStories.isLive,
             hasStory: userStories.hasStory,
             stories: userStories.stories,
             latestStoryTime: userStories.latestStoryTime

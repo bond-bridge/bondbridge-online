@@ -6,21 +6,17 @@ import { fetchUserProfile } from "@/apis/commonApiCalls/profileApi";
 import type { UserProfileData } from "@/apis/apiTypes/profileTypes";
 import { useApiCall } from "@/apis/globalCatchError";
 import { useSelector } from "react-redux";
-import { RootState } from "@/store";
+import { RootState} from "@/store";
 import { addToSearchHistory } from "@/apis/commonApiCalls/searchHistoryApi";
 import { toast } from "sonner";
-import { fetchCommunityById } from "@/apis/commonApiCalls/communitiesApi";
-import { CommunityResponse } from "@/apis/apiTypes/communitiesTypes";
+
 
 const ProfilePage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const location = useLocation();
   const [userData, setUserData] = useState<UserProfileData | null>(null);
-  const [userCommunityDetails, setUserCommunityDetails] = useState<CommunityResponse[]>([]);
   const [executeProfileFetch, isLoading] = useApiCall(fetchUserProfile);
   const [executeAddToSearchHistory] = useApiCall(addToSearchHistory);
-  const [executeFetchCommunity] = useApiCall(fetchCommunityById);
-  const [loadingCommunities, setLoadingCommunities] = useState(false);
   const hasAddedToHistory = useRef(false);
   
   // Get currentUserId from Redux store instead of localStorage
@@ -56,34 +52,10 @@ const ProfilePage: React.FC = () => {
     };
 
     loadUserData();
-  }, [userId, currentUserId]); // Added currentUserId to dependency list
+  }, [userId, currentUserId]);
 
-  // Fetch community details for each community the user is part of
-  useEffect(() => {
-    const fetchUserCommunities = async () => {
-      if (!userData?.communities || userData.communities.length === 0) {
-        setUserCommunityDetails([]);
-        return;
-      }
 
-      setLoadingCommunities(true);
-      
-      // Fetch data for each community in parallel using Promise.all
-      const communityPromises = userData.communities.map(communityId => 
-        executeFetchCommunity(communityId)
-          .then(result => result.success && result.data ? result.data : null)
-      );
-
-      const communities = await Promise.all(communityPromises);
-      // Filter out any failed requests (null values)
-      setUserCommunityDetails(communities.filter(community => community !== null) as CommunityResponse[]);
-      setLoadingCommunities(false);
-    };
-
-    fetchUserCommunities();
-  }, [userData?.communities]);
-
-  if (isLoading || loadingCommunities) {
+  if (isLoading) {
     return (
       <div className="h-[80vh] w-full flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -116,10 +88,6 @@ const ProfilePage: React.FC = () => {
     );
   }
 
-  // Extract just the community IDs to pass to the Profile component
-  // This maintains compatibility with the existing Profile component
-  const communityIds = userCommunityDetails.map(community => community._id);
-  console.log("blockkk: ",userData.isBlocked);
   return (
     <>
       <Profile
@@ -136,7 +104,7 @@ const ProfilePage: React.FC = () => {
         isFollower={userData.isFollower}
         requestSent={userData.requestSent}
         compatibility={userData.compatibility}
-        communities={communityIds} // Pass just the IDs to keep the existing interface
+        communities={userData.communities} // Pass just the IDs to keep the existing interface
         interests={userData.interests}
         public={userData.public}
         isBlocked={userData.isBlocked}

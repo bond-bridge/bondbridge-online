@@ -63,7 +63,6 @@ export default function StoryPage() {
                         user: story.name,
                         userId: story.userId,
                         avatar: story.profilePic || story.avatar,
-                        isLive: story.isLive,
                         hasStory: story.hasStory,
                         stories: story.stories,
                         latestStoryTime: story.latestStoryTime
@@ -133,7 +132,6 @@ export default function StoryPage() {
                 user: story.name,
                 userId: story.userId,
                 avatar: story.profilePic || story.avatar,
-                isLive: story.isLive,
                 hasStory: story.hasStory,
                 stories: story.stories,
                 latestStoryTime: story.latestStoryTime

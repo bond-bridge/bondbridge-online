@@ -60,7 +60,7 @@ const AllCommunities: React.FC<AllCommunitiesProps> = ({ communities, isLoadingC
               {community.name}
             </h3>
             <p className="text-sm text-muted-foreground">
-              Members: {community?.members?.length}
+              Members: {community?.memberCount}
             </p>
           </div>
         </div>

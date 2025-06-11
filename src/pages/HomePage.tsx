@@ -362,7 +362,6 @@ export default function HomePage() {
         user: "Your Story",
         userId: currentUserId || "",
         avatar: currentUser.avatar || "/profile/avatars/1.png",
-        isLive: false,
         hasStory: selfStories.stories && selfStories.stories.length > 0,
         stories: selfStories.stories || [],
         latestStoryTime: selfStories.latestStoryTime || Date.now(),
@@ -378,7 +377,6 @@ export default function HomePage() {
       user: story.name,
       userId: story.userId,
       avatar: story.profilePic,
-      isLive: story.isLive,
       hasStory: story.hasStory,
       stories: story.stories,
       latestStoryTime: story.latestStoryTime,
@@ -413,7 +411,6 @@ export default function HomePage() {
                             userId: formattedSelfStory.userId,
                             avatar: formattedSelfStory.avatar,
                             profilePic: formattedSelfStory.profilePic,
-                            isLive: formattedSelfStory.isLive,
                             hasStory: formattedSelfStory.hasStory,
                             stories: formattedSelfStory.stories,
                             latestStoryTime: formattedSelfStory.latestStoryTime
@@ -457,20 +454,21 @@ export default function HomePage() {
               )}
             </div>
             {/* Other Stories */}
-            {stories.map((story, index) => (
-              <Story
-                key={`story-${story.userId || index}`}
-                user={story.name}
-                userId={story.userId}
-                avatar={story.profilePic}
-                isLive={story.isLive}
-                hasStory={story.hasStory}
-                stories={story.stories}
-                latestStoryTime={story.latestStoryTime}
-                allStories={allFormattedStories}
-                storyIndex={index + 1}
-              />
-            ))}
+            {stories
+              .filter(story => story.stories && story.stories.length > 0)
+              .map((story, index) => (
+                <Story
+                  key={`story-${story.userId || index}`}
+                  user={story.name}
+                  userId={story.userId}
+                  avatar={story.profilePic}
+                  hasStory={story.hasStory}
+                  stories={story.stories}
+                  latestStoryTime={story.latestStoryTime}
+                  allStories={allFormattedStories}
+                  storyIndex={index + 1}
+                />
+              ))}
           </div>
         </div>
       )}

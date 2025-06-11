@@ -228,6 +228,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({ onValidationChange })
             type="text"
             id="referralCode"
             value={referralCode}
+            maxLength={6}
             onChange={handleChange}
             readOnly={!!sessionStorage.getItem('referralCode')}
             className={sessionStorage.getItem('referralCode') ? 'bg-muted cursor-not-allowed' : ''}

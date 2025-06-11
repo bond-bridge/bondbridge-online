@@ -72,6 +72,11 @@ const Layout: React.FC<LayoutProps> = ({
             bio: result.data.bio,
             privacyLevel: result.data.privacyLevel,
             userId: result.data.userId,
+            followers: result.data.followers,
+            following: result.data.following,
+            isBlocked: result.data.isBlocked,
+            avatarSrc: result.data.avatarSrc,
+
           })
         );
       }

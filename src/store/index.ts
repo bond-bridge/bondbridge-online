@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import settingsReducer from "./settingsSlice";
 import currentUserReducer from "./currentUserSlice";
+import notificationsReducer from "./notificationsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
     createGroup: createGroupReducer,
     settings: settingsReducer,
     currentUser: currentUserReducer,
+    notifications: notificationsReducer,
     // Add other reducers here
   },
 });
