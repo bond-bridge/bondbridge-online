@@ -1,10 +1,11 @@
-import apiClient, { communityFormDataApiClient, formDataApiClient } from "../apiClient";
+import apiClient, { adminApiClient, formDataApiClient } from "../apiClient";
 import { CreatePostRequest } from "../apiTypes/request";
 import {
   CreatePostResponse,
   RewriteWithBondChatResponse,
 } from "../apiTypes/response";
 import { VideoFileWithThumbnail } from "../../components/MediaCropModal";
+import { uploadMedia } from "../uploadApi";
 
 /**
  * Creates a new post with optional media attachments
@@ -16,19 +17,13 @@ export const createPost = async (
 ): Promise<CreatePostResponse> => {
   const formData = new FormData();
   formData.append("content", postData.content);
-
-  // Append text data
-  if (postData.isCommunityPost) {
-    formData.append("communityId", postData.communityId!);
-    formData.append("isAnonymous", postData.isAnonymous!.toString());
-  }
-  else{
   formData.append("whoCanComment", postData.whoCanComment.toString());
   formData.append("privacy", postData.privacy.toString());
-  }
+
   // Handle media files while maintaining sequence
   if (postData.image && postData.image.length > 0) {
-    postData.image.forEach((file, index) => {
+    for (let index = 0; index < postData.image.length; index++) {
+      const file = postData.image[index];
       if (file.type.startsWith("image/")) {
         formData.append(`image`, file);
       } else if (file.type.startsWith("video/")) {
@@ -45,26 +40,61 @@ export const createPost = async (
           formData.append(`videoCropData_${index}`, JSON.stringify(videoFile.cropData));
         }
       }
-    });
+    }
   }
 
   // For debugging
   console.log("Sending post data:", Object.fromEntries(formData.entries()));
-  let response;
-  if (postData.isCommunityPost) {
-    response = await communityFormDataApiClient.post<CreatePostResponse>(
-      `/communities/${postData.communityId}/post`,
-      formData
-    );
-  } else {
-    response = await formDataApiClient.post<CreatePostResponse>(
+
+  const response = await formDataApiClient.post<CreatePostResponse>(
       "/post",
       formData
     );
-  }
   return response.data;
 };
 
+
+
+/**
+ * Creates a new post with optional media attachments
+ * @param postData - The post data including content and media files
+ * @returns Promise with the created post data
+ */
+export const createCommunityPost = async (
+  postData: CreatePostRequest
+): Promise<CreatePostResponse> => {
+
+  const communityMediaLinks : {type:string,url:string}[] = [];
+  // Handle media files while maintaining sequence
+  if (postData.image && postData.image.length > 0) {
+    for (let index = 0; index < postData.image.length; index++) {
+      const file = postData.image[index];
+      if (file.type.startsWith("image/")) {
+        if (postData.isCommunityPost) {
+          const mediaLink = await uploadMedia(file, "image", "community");
+          communityMediaLinks.push(mediaLink);
+        }
+      } else if (file.type.startsWith("video/")) {
+        if (postData.isCommunityPost) {
+          const mediaLink = await uploadMedia(file, "video", "community");
+          communityMediaLinks.push(mediaLink);
+        }
+      }
+    }
+  }
+
+  const response = await adminApiClient.post<CreatePostResponse>(
+      `/communities/${postData.communityId}/post`,
+      {
+        content: postData.content,
+        communityId: postData.communityId,
+        isAnonymous: postData.isAnonymous,
+        mediaUrls: communityMediaLinks,
+      }
+    );
+
+  return response.data;
+};
 /**
  * Updates an existing post with new content
  * @param postData - The post data including content and postId
