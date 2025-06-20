@@ -4,6 +4,7 @@ import { Separator } from "../components/ui/separator";
 import { Trash2, Image, Smile, Video, Mic, ArrowLeft, ChevronDown } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 import {
+  createCommunityPost,
   createPost,
   rewriteWithBondChat,
 } from "../apis/commonApiCalls/createPostApi";
@@ -320,7 +321,7 @@ const CreatePost = ({
   );
 
   // Use the API call hook for the createPost function
-  const [executeCreatePost, isCreatingPost] = useApiCall(createPost);
+  const [executeCreatePost, isCreatingPost] = useApiCall(communityPost ? createCommunityPost : createPost);
   // Use the API call hook for the rewriteWithBondChat function
   const [executeRewriteWithBondChat, isRewritingWithBondChat] =
     useApiCall(rewriteWithBondChat);
