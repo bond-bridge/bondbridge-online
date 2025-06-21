@@ -20,7 +20,6 @@ export interface UserProfileData {
   referralCode?: string;
   referralCount?: number;
   userId?: string;
-
 }
 
 export interface PostData {
