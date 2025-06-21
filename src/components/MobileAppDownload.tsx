@@ -25,7 +25,7 @@ const MobileAppDownload: React.FC = () => {
         
         {/* App store buttons */}
         <div className="flex flex-row justify-center items-center gap-4">
-          <Link to="#" className="transform transition-all hover:scale-105">
+          <Link to="https://apps.apple.com/in/app/bondbridge-ai/id6745119162" className="transform transition-all hover:scale-105">
             <img 
               src="/assets/stores/appstore.svg" 
               alt="Download on App Store" 

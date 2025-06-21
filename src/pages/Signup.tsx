@@ -87,7 +87,7 @@ const Signup: React.FC = () => {
       setErrorMessage("User with this Phone Number Already Exists");
       return;
     } else if (!result.success) {
-      setErrorMessage("Invalid Phone Number");
+      setErrorMessage(result.message || "Invalid Phone Number");
       return;
     }
 
@@ -249,7 +249,7 @@ const Signup: React.FC = () => {
               <div className="flex justify-center pt-4">
                 {/* <p className="text-md text-center text-muted-foreground">Get the app:</p> */}
                 <div className="flex justify-center gap-4">
-                  <Link to="#" className="">
+                  <Link to="https://apps.apple.com/in/app/bondbridge-ai/id6745119162" className="">
                     <img
                       src="/assets/stores/appstore.svg"
                       alt="Download on App Store"
