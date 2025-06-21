@@ -237,7 +237,7 @@ const CommunityProfilePage = () => {
           variant="ghost"
           size="icon"
           className="absolute top-4 left-4 bg-background/60 backdrop-blur-sm rounded-full cursor-pointer"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/activity")}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
