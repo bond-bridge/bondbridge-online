@@ -94,7 +94,7 @@ const TabPageLayout: React.FC<TabPageLayoutProps> = ({
     if (currentTab === tabs[0]?.id) {
       if (tabs[0]?.id === "personal") {
         // Disable back button for personal tab
-        return;
+        navigate("/login");
       } else if (tabs[0]?.id === "info") {
         navigate("/activity");
       }
@@ -145,7 +145,7 @@ const TabPageLayout: React.FC<TabPageLayoutProps> = ({
                 "cursor-pointer",
                 currentTab === tabs[0]?.id && tabs[0]?.id === "personal" && "opacity-50 cursor-not-allowed"
               )}
-              disabled={currentTab === tabs[0]?.id && tabs[0]?.id === "personal"}
+              // disabled={currentTab === tabs[0]?.id && tabs[0]?.id === "personal"}
             >
               Back
             </Button>
