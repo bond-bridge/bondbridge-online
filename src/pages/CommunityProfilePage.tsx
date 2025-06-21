@@ -302,7 +302,7 @@ const CommunityProfilePage = () => {
               <Link to={`/community/${communityId}/post`}>
                 <Button
                   variant="default"
-                  className="rounded-full text-foreground border-destructive cursor-pointer"
+                  className="rounded-full border-destructive cursor-pointer"
                   disabled={isMembershipLoading}
                 >
                   + Post
