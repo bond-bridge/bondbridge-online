@@ -10,6 +10,8 @@ import {
   joinCommunity,
   fetchCommunityById,
   fetchCommunityPosts,
+  fetchCommunityMembers,
+  CommunityMember,
 } from "@/apis/commonApiCalls/communitiesApi";
 import { CommunityResponse, TransformedCommunityPost } from "@/apis/apiTypes/communitiesTypes";
 import { Loader2 } from "lucide-react";
@@ -19,6 +21,7 @@ import CommunityPosts from "@/components/CommunityPosts";
 import CommunityQuotes from "@/components/CommunityQuotes";
 // import { TruncatedList } from "@/components/ui/TruncatedList";
 import { TruncatedText } from "@/components/ui/TruncatedText";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 
 const CommunityProfilePage = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -30,9 +33,17 @@ const CommunityProfilePage = () => {
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const [isUserMember, setIsUserMember] = useState(false);
   const [isMembershipLoading, setIsMembershipLoading] = useState(false);
+  
+  const [members, setMembers] = useState<CommunityMember[]>([]);
+  const [isLoadingMembers, setIsLoadingMembers] = useState(false);
+  const [membersPage, setMembersPage] = useState(1);
+  const [hasMoreMembers, setHasMoreMembers] = useState(true);
+  const [activeTab, setActiveTab] = useState("feed");
+
   const [executeJoinCommunity] = useApiCall(joinCommunity);
   const [executeFetchCommunityById] = useApiCall(fetchCommunityById);
   const [executeFetchCommunityPosts] = useApiCall(fetchCommunityPosts);
+  const [executeFetchCommunityMembers] = useApiCall(fetchCommunityMembers);
 
   // Fetch community details
   useEffect(() => {
@@ -46,11 +57,8 @@ const CommunityProfilePage = () => {
         const communityData = result.data;
         setCommunity(communityData);
 
-        // Check if current user is a member
-        const userId = localStorage.getItem("userId");
-        if (userId && communityData.members) {
-          setIsUserMember(communityData.members.includes(userId));
-        }
+        // Membership status is now part of the response, so we can use it directly
+        setIsUserMember(communityData.isJoined || false);
       } else {
         setError("Failed to load Community Data");
       }
@@ -78,6 +86,46 @@ const CommunityProfilePage = () => {
 
     loadCommunityPosts();
   }, [communityId]);
+
+  const loadMembers = async (page: number) => {
+    if (!communityId) return;
+
+    setIsLoadingMembers(true);
+    const result = await executeFetchCommunityMembers({
+      communityId,
+      page,
+      limit: 15,
+    });
+
+    if (result.success && result.data) {
+      const { members: newMembers, hasMore } = result.data;
+      setMembers((prev) => (page === 1 ? newMembers : [...prev, ...newMembers]));
+      setHasMoreMembers(hasMore);
+      setMembersPage(page);
+    } else {
+      console.error("Failed to load members");
+    }
+    setIsLoadingMembers(false);
+  };
+
+  // Fetch members when the members tab is activated
+  useEffect(() => {
+    if (activeTab === 'members' && members.length === 0) {
+      loadMembers(1);
+    }
+  }, [activeTab, communityId]);
+
+  const loadMoreMembers = () => {
+    if (!isLoadingMembers && hasMoreMembers) {
+      loadMembers(membersPage + 1);
+    }
+  };
+
+  const lastMemberRef = useInfiniteScroll({
+    isLoading: isLoadingMembers,
+    hasMore: hasMoreMembers,
+    onLoadMore: loadMoreMembers,
+  });
 
   const handleJoinCommunity = async () => {
     if (!communityId) return;
@@ -216,7 +264,7 @@ const CommunityProfilePage = () => {
         <div className="flex items-center gap-2 my-2">
           <Badge variant="secondary" className="px-2 py-0.5">
             <Users className="h-3 w-3 mr-1" />
-            {community?.memberDetails?.length} Members
+            {community?.memberCount} Members
           </Badge>
           <Badge variant="secondary" className="px-2 py-0.5">
             <MessageSquare className="h-3 w-3 mr-1" />
@@ -300,7 +348,11 @@ const CommunityProfilePage = () => {
       </div>
 
       <div className="flex-1 mt-8">
-        <Tabs defaultValue="feed" className="w-full">
+        <Tabs 
+          defaultValue="feed" 
+          className="w-full"
+          onValueChange={(value) => setActiveTab(value)}
+        >
           <TabsList className="grid w-full grid-cols-4 bg-background/30 rounded-lg backdrop-blur-sm mb-4 *:rounded-md *:m-1 *:data-[state=active]:bg-accent *:data-[state=active]:text-foreground *:text-muted-foreground">
             <TabsTrigger value="feed" className="cursor-pointer">News Feed</TabsTrigger>
             <TabsTrigger value="posts" className="cursor-pointer">Recent</TabsTrigger>
@@ -369,8 +421,20 @@ const CommunityProfilePage = () => {
           </TabsContent>
 
           <TabsContent value="members" className="p-4">
-            {community?.memberDetails && community.memberDetails.length > 0 ? (
-              <CommunityMemberList memberDetails={community.memberDetails} />
+            {isLoadingMembers && members.length === 0 ? (
+              <div className="flex justify-center items-center min-h-[200px]">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : members.length > 0 ? (
+              <div>
+                <CommunityMemberList memberDetails={members} />
+                {isLoadingMembers && (
+                  <div className="flex justify-center items-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                )}
+                <div ref={lastMemberRef} />
+              </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 No Members in the Community
