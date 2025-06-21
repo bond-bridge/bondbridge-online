@@ -68,7 +68,7 @@ export const fetchCommunities = async (params?: FetchCommunitiesRequest): Promis
     queryParams.append('limit', params.limit.toString());
   }
   
-  const url = `/communityDetailsWithoutPostAndMembersData${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+  const url = `/communities/communityDetailsWithoutPostAndMembersData${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
   const response = await adminApiClient.get<CommunitiesResponse>(url);
   return response.data.communities;
 };
