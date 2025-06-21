@@ -219,6 +219,15 @@ export interface TransformedCommunityPost {
 // Re-export ProfilePostData as CommunityPostDetail for semantic clarity
 export type CommunityPostDetail = ProfilePostData;
 
+// Interface for paginated community posts API response
+export interface PaginatedCommunityPostsApiResponse {
+  success: boolean;
+  posts: CommunityPostResponse[];
+  pagination: {
+    hasNextPage: boolean;
+  };
+}
+
 // Extended comment data interfaces for community posts
 export interface CommentDetailsData {
   _id: string;

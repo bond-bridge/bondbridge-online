@@ -8,7 +8,8 @@ import {
   FetchCommunitiesRequest,
   FetchCommunityPostsRequest,
   TransformedCommunityPost,
-  ReactionResponse 
+  ReactionResponse,
+  PaginatedCommunityPostsApiResponse
 } from '../apiTypes/communitiesTypes';
 
 /**
@@ -139,9 +140,8 @@ export const joinMultipleCommunities = async (communityIds: string[]): Promise<{
  */
 export const fetchCommunityById = async (communityId: string): Promise<CommunityResponse> => {
   const response = await adminApiClient.get<CommunityResponse>(
-    `/communities/${communityId}`
+    `/communities/${communityId}/communityDetailsWithoutPostAndMembersData`
   );
-  
   return response.data;
 };
 
@@ -324,4 +324,162 @@ export const editCommunityPost = async (
     throw new Error(response.data.message || 'Failed to edit community post');
   }
   return response.data;
+};
+
+/**
+ * Interface for fetch community members request parameters
+ */
+interface FetchCommunityMembersRequest {
+  communityId: string;
+  page: number;
+  limit: number;
+}
+
+/**
+ * Interface for a community member
+ */
+export interface CommunityMember {
+  _id: string;
+  name: string;
+  profilePic: string;
+  avatar: string;
+  isFriend?: boolean;
+  isRequestSent?: boolean;
+  isRequestReceived?: boolean;
+}
+
+/**
+ * Interface for the fetch community members API response
+ */
+interface FetchCommunityMembersApiResponse {
+  memberDetails: CommunityMember[];
+  pagination: {
+    hasNextPage: boolean;
+  };
+}
+
+/**
+ * Function to fetch members of a community with pagination
+ * @param params Request parameters (communityId, page, limit)
+ * @returns Promise with community members and pagination info
+ */
+export const fetchCommunityMembers = async (
+  params: FetchCommunityMembersRequest
+): Promise<{ members: CommunityMember[]; hasMore: boolean }> => {
+  try {
+    const queryParams = new URLSearchParams();
+    
+    if (params.page) {
+      queryParams.append('page', params.page.toString());
+    }
+    if (params.limit) {
+      queryParams.append('limit', params.limit.toString());
+    }
+    
+    const url = `/communities/${params.communityId}/membersOfCommunity?${queryParams.toString()}`;
+    const response = await adminApiClient.get<FetchCommunityMembersApiResponse>(url);
+    
+    const responseData = response.data;
+    
+    return {
+      members: responseData.memberDetails || [],
+      hasMore: responseData.pagination?.hasNextPage || false,
+    };
+  } catch (error) {
+    console.error('Error fetching community members:', error);
+    return { members: [], hasMore: false };
+  }
+};
+
+/**
+ * Function to fetch all posts of a community with pagination (for News Feed).
+ * @param communityId Community ID
+ * @param params Pagination parameters (page, limit)
+ * @returns Promise with community posts and pagination info
+ */
+export const fetchCommunityFeed = async (
+  communityId: string,
+  params: { page: number; limit: number }
+): Promise<{ posts: TransformedCommunityPost[]; hasMore: boolean }> => {
+  try {
+    const queryParams = new URLSearchParams({
+      page: params.page.toString(),
+      limit: params.limit.toString(),
+    });
+    
+    const url = `/communities/${communityId}/postWithPagination?${queryParams.toString()}`;
+    const response = await adminApiClient.get<PaginatedCommunityPostsApiResponse>(url);
+    
+    const responseData = response.data;
+    
+    return {
+      posts: (responseData.posts || []).map(post => transformCommunityPost(post, communityId)),
+      hasMore: responseData.pagination?.hasNextPage || false,
+    };
+  } catch (error) {
+    console.error('Error fetching community feed:', error);
+    return { posts: [], hasMore: false };
+  }
+};
+
+/**
+ * Function to fetch posts with media of a community with pagination (for Recent tab).
+ * @param communityId Community ID
+ * @param params Pagination parameters (page, limit)
+ * @returns Promise with community posts and pagination info
+ */
+export const fetchCommunityMediaPosts = async (
+  communityId: string,
+  params: { page: number; limit: number }
+): Promise<{ posts: TransformedCommunityPost[]; hasMore: boolean }> => {
+  try {
+    const queryParams = new URLSearchParams({
+      page: params.page.toString(),
+      limit: params.limit.toString(),
+    });
+
+    const url = `/communities/${communityId}/postWithPaginationWithMedia?${queryParams.toString()}`;
+    const response = await adminApiClient.get<PaginatedCommunityPostsApiResponse>(url);
+    
+    const responseData = response.data;
+    
+    return {
+      posts: (responseData.posts || []).map(post => transformCommunityPost(post, communityId)),
+      hasMore: responseData.pagination?.hasNextPage || false,
+    };
+  } catch (error) {
+    console.error('Error fetching community media posts:', error);
+    return { posts: [], hasMore: false };
+  }
+};
+
+/**
+ * Function to fetch posts without media of a community with pagination (for Comments tab).
+ * @param communityId Community ID
+ * @param params Pagination parameters (page, limit)
+ * @returns Promise with community posts and pagination info
+ */
+export const fetchCommunityQuotePosts = async (
+  communityId: string,
+  params: { page: number; limit: number }
+): Promise<{ posts: TransformedCommunityPost[]; hasMore: boolean }> => {
+  try {
+    const queryParams = new URLSearchParams({
+      page: params.page.toString(),
+      limit: params.limit.toString(),
+    });
+
+    const url = `/communities/${communityId}/postWithPaginationWithoutMedia?${queryParams.toString()}`;
+    const response = await adminApiClient.get<PaginatedCommunityPostsApiResponse>(url);
+    
+    const responseData = response.data;
+    
+    return {
+      posts: (responseData.posts || []).map(post => transformCommunityPost(post, communityId)),
+      hasMore: responseData.pagination?.hasNextPage || false,
+    };
+  } catch (error) {
+    console.error('Error fetching community quote posts:', error);
+    return { posts: [], hasMore: false };
+  }
 };

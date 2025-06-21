@@ -63,6 +63,7 @@ const LeftSidebar: React.FC = () => {
   const handleLogout = () => {
     dispatch(resetUser());
     localStorage.removeItem("userId");
+    localStorage.removeItem("token");
     window.location.href = "/login";
   };
 
