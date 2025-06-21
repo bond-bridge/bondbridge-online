@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,9 +9,11 @@ import { useApiCall } from "@/apis/globalCatchError";
 import {
   joinCommunity,
   fetchCommunityById,
-  fetchCommunityPosts,
   fetchCommunityMembers,
   CommunityMember,
+  fetchCommunityFeed,
+  fetchCommunityMediaPosts,
+  fetchCommunityQuotePosts,
 } from "@/apis/commonApiCalls/communitiesApi";
 import { CommunityResponse, TransformedCommunityPost } from "@/apis/apiTypes/communitiesTypes";
 import { Loader2 } from "lucide-react";
@@ -19,9 +21,10 @@ import { toast } from "sonner";
 import CommunityMemberList from "@/components/CommunityMemberList";
 import CommunityPosts from "@/components/CommunityPosts";
 import CommunityQuotes from "@/components/CommunityQuotes";
-// import { TruncatedList } from "@/components/ui/TruncatedList";
 import { TruncatedText } from "@/components/ui/TruncatedText";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+
+type PostType = 'feed' | 'media' | 'quotes';
 
 const CommunityProfilePage = () => {
   const { communityId } = useParams<{ communityId: string }>();
@@ -29,8 +32,6 @@ const CommunityProfilePage = () => {
   const [community, setCommunity] = useState<CommunityResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [communityPosts, setCommunityPosts] = useState<TransformedCommunityPost[]>([]);
-  const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const [isUserMember, setIsUserMember] = useState(false);
   const [isMembershipLoading, setIsMembershipLoading] = useState(false);
   
@@ -38,11 +39,24 @@ const CommunityProfilePage = () => {
   const [isLoadingMembers, setIsLoadingMembers] = useState(false);
   const [membersPage, setMembersPage] = useState(1);
   const [hasMoreMembers, setHasMoreMembers] = useState(true);
+  
   const [activeTab, setActiveTab] = useState("feed");
+
+  const [feedPosts, setFeedPosts] = useState<TransformedCommunityPost[]>([]);
+  const [mediaPosts, setMediaPosts] = useState<TransformedCommunityPost[]>([]);
+  const [quotePosts, setQuotePosts] = useState<TransformedCommunityPost[]>([]);
+
+  const [postsState, setPostsState] = useState({
+    feed: { page: 1, hasMore: true, isLoading: false },
+    media: { page: 1, hasMore: true, isLoading: false },
+    quotes: { page: 1, hasMore: true, isLoading: false },
+  });
 
   const [executeJoinCommunity] = useApiCall(joinCommunity);
   const [executeFetchCommunityById] = useApiCall(fetchCommunityById);
-  const [executeFetchCommunityPosts] = useApiCall(fetchCommunityPosts);
+  const [executeFetchCommunityFeed] = useApiCall(fetchCommunityFeed);
+  const [executeFetchCommunityMediaPosts] = useApiCall(fetchCommunityMediaPosts);
+  const [executeFetchCommunityQuotePosts] = useApiCall(fetchCommunityQuotePosts);
   const [executeFetchCommunityMembers] = useApiCall(fetchCommunityMembers);
 
   // Fetch community details
@@ -56,8 +70,6 @@ const CommunityProfilePage = () => {
       if (result.success && result.data) {
         const communityData = result.data;
         setCommunity(communityData);
-
-        // Membership status is now part of the response, so we can use it directly
         setIsUserMember(communityData.isJoined || false);
       } else {
         setError("Failed to load Community Data");
@@ -68,24 +80,51 @@ const CommunityProfilePage = () => {
     loadCommunity();
   }, [communityId]);
 
-  // Fetch community posts
-  useEffect(() => {
-    const loadCommunityPosts = async () => {
-      if (!communityId) return;
+  const loadPosts = useCallback(async (type: PostType, page: number) => {
+    if (!communityId) return;
 
-      setIsLoadingPosts(true);
-      const result = await executeFetchCommunityPosts(communityId);
+    setPostsState(prev => ({ ...prev, [type]: { ...prev[type], isLoading: true } }));
 
-      if (result.success && result.data) {
-        setCommunityPosts(result.data);
+    let result;
+    const params = { page, limit: 9 };
+
+    if (type === 'feed') {
+      result = await executeFetchCommunityFeed(communityId, params);
+    } else if (type === 'media') {
+      result = await executeFetchCommunityMediaPosts(communityId, params);
+    } else {
+      result = await executeFetchCommunityQuotePosts(communityId, params);
+    }
+
+    if (result.success && result.data) {
+      const { posts: newPosts, hasMore } = result.data;
+      if (type === 'feed') {
+        setFeedPosts(prev => (page === 1 ? newPosts : [...prev, ...newPosts]));
+      } else if (type === 'media') {
+        setMediaPosts(prev => (page === 1 ? newPosts : [...prev, ...newPosts]));
       } else {
-        console.error("Failed to load community posts");
+        setQuotePosts(prev => (page === 1 ? newPosts : [...prev, ...newPosts]));
       }
-      setIsLoadingPosts(false);
-    };
-
-    loadCommunityPosts();
+      setPostsState(prev => ({ ...prev, [type]: { page, hasMore, isLoading: false } }));
+    } else {
+      console.error(`Failed to load ${type} posts`);
+      setPostsState(prev => ({ ...prev, [type]: { ...prev[type], isLoading: false } }));
+    }
   }, [communityId]);
+
+  useEffect(() => {
+    if (activeTab === 'feed' && feedPosts.length === 0) loadPosts('feed', 1);
+    else if (activeTab === 'posts' && mediaPosts.length === 0) loadPosts('media', 1);
+    else if (activeTab === 'quotes' && quotePosts.length === 0) loadPosts('quotes', 1);
+    else if (activeTab === 'members' && members.length === 0) loadMembers(1);
+  }, [activeTab, communityId]);
+
+  const loadMorePosts = (type: PostType) => {
+    const { page, hasMore, isLoading } = postsState[type];
+    if (!isLoading && hasMore) {
+      loadPosts(type, page + 1);
+    }
+  };
 
   const loadMembers = async (page: number) => {
     if (!communityId) return;
@@ -108,18 +147,29 @@ const CommunityProfilePage = () => {
     setIsLoadingMembers(false);
   };
 
-  // Fetch members when the members tab is activated
-  useEffect(() => {
-    if (activeTab === 'members' && members.length === 0) {
-      loadMembers(1);
-    }
-  }, [activeTab, communityId]);
-
   const loadMoreMembers = () => {
     if (!isLoadingMembers && hasMoreMembers) {
       loadMembers(membersPage + 1);
     }
   };
+
+  const lastFeedPostRef = useInfiniteScroll({
+    isLoading: postsState.feed.isLoading,
+    hasMore: postsState.feed.hasMore,
+    onLoadMore: () => loadMorePosts('feed'),
+  });
+
+  const lastMediaPostRef = useInfiniteScroll({
+    isLoading: postsState.media.isLoading,
+    hasMore: postsState.media.hasMore,
+    onLoadMore: () => loadMorePosts('media'),
+  });
+
+  const lastQuotePostRef = useInfiniteScroll({
+    isLoading: postsState.quotes.isLoading,
+    hasMore: postsState.quotes.hasMore,
+    onLoadMore: () => loadMorePosts('quotes'),
+  });
 
   const lastMemberRef = useInfiniteScroll({
     isLoading: isLoadingMembers,
@@ -183,17 +233,7 @@ const CommunityProfilePage = () => {
     }
     setIsMembershipLoading(false);
   };
-
-  // Filter posts for the Quotes tab (text-only posts)
-  const quotePosts = communityPosts.filter(post =>
-    (!post.media || post.media.length === 0)
-  );
-
-  // Filter posts for the Posts tab (posts with media)
-  const mediaPosts = communityPosts.filter(post =>
-    post.media && post.media.length > 0
-  );
-
+  
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -219,6 +259,40 @@ const CommunityProfilePage = () => {
       </div>
     );
   }
+
+  const renderPostList = <P extends { posts: TransformedCommunityPost[]; communityId: string }>(
+    type: PostType,
+    posts: TransformedCommunityPost[],
+    lastElementRef: (node: HTMLDivElement | null) => void,
+    Component: React.ComponentType<P>,
+    componentProps: Omit<P, 'posts'>
+  ) => {
+    const { isLoading, hasMore } = postsState[type];
+    const allProps = { ...componentProps, posts } as P;
+
+    return (
+      <div>
+        {posts.length > 0 ? (
+          <div>
+            <Component {...allProps} />
+            {hasMore && <div ref={lastElementRef} />}
+          </div>
+        ) : (
+          !isLoading && (
+            <div className="text-center py-8 text-muted-foreground">
+              No Posts
+            </div>
+          )
+        )}
+        {isLoading && (
+          <div className="flex justify-center items-center py-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        )}
+      </div>
+    );
+  };
+
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -279,23 +353,6 @@ const CommunityProfilePage = () => {
           className="text-foreground text-sm text-center mx-auto max-w-[35vw]"
         />
 
-        {/* {community.interest && (
-          <TruncatedList
-            items={community.interest.split(",")}
-            limit={5}
-            className="mt-3 w-full"
-            itemsContainerClassName="flex flex-wrap justify-center gap-2 max-w-[80%] mx-auto"
-            renderItem={(interest, index) => (
-              <span 
-                key={index} 
-                className="bg-muted font-semibold text-foreground border border-primary text-xs px-2 py-1 rounded-full"
-              >
-                {interest}
-              </span>
-            )}
-          />
-        )} */}
-
         <div className="mt-6">
           {isUserMember ? (
             <div className="flex gap-3">
@@ -333,17 +390,6 @@ const CommunityProfilePage = () => {
               Join
             </Button>
           )}
-          {/* <Button
-            variant="outline"
-            size="icon"
-            className="rounded-full"
-            onClick={() => {
-              // Share functionality would go here
-              navigator.clipboard.writeText(window.location.href);
-            }}
-          >
-            <Share2 className="h-4 w-4" />
-          </Button> */}
         </div>
       </div>
 
@@ -359,65 +405,25 @@ const CommunityProfilePage = () => {
             <TabsTrigger value="quotes" className="cursor-pointer">Comments</TabsTrigger>
             <TabsTrigger value="members" className="cursor-pointer">Members</TabsTrigger>
           </TabsList>
-
-          {/* <TabsContent value="about" className="p-4">
-            <div className="bg-muted/50 rounded-lg p-4">
-              <h3 className="font-semibold mb-2">Description</h3>
-              <p className="text-muted-foreground">{community.description}</p>
-
-              <h3 className="font-semibold mt-4 mb-2">Interest</h3>
-              <Badge className="bg-primary/20 text-foreground border-primary">
-                {community.interest}
-              </Badge>
-
-              <h3 className="font-semibold mt-4 mb-2">Created</h3>
-              <p className="text-muted-foreground">
-                {new Date(community.createdAt).toLocaleDateString()}
-              </p>
-            </div>
-          </TabsContent> */}
-
+          
           <TabsContent value="feed" className="p-4">
-            {isLoadingPosts ? (
-              <div className="flex justify-center items-center min-h-[200px]">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : communityPosts.length > 0 ? (
-              <CommunityQuotes showMediaPosts={true} posts={communityPosts}
-                communityId={communityId || ''} />
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                No Posts
-              </div>
-            )}
+            {renderPostList('feed', feedPosts, lastFeedPostRef, CommunityQuotes, {
+              showMediaPosts: true,
+              communityId: communityId || ''
+            })}
           </TabsContent>
 
           <TabsContent value="posts" className="p-4">
-            {isLoadingPosts ? (
-              <div className="flex justify-center items-center min-h-[200px]">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : mediaPosts.length > 0 ? (
-              <CommunityPosts posts={mediaPosts} communityId={communityId || ''} />
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                No Posts
-              </div>
-            )}
+            {renderPostList('media', mediaPosts, lastMediaPostRef, CommunityPosts, {
+              communityId: communityId || ''
+            })}
           </TabsContent>
 
           <TabsContent value="quotes" className="p-4">
-            {isLoadingPosts ? (
-              <div className="flex justify-center items-center min-h-[200px]">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : quotePosts.length > 0 ? (
-              <CommunityQuotes showMediaPosts={false} posts={quotePosts} communityId={communityId || ''} />
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                No Quotes
-              </div>
-            )}
+            {renderPostList('quotes', quotePosts, lastQuotePostRef, CommunityQuotes, {
+              showMediaPosts: false,
+              communityId: communityId || ''
+            })}
           </TabsContent>
 
           <TabsContent value="members" className="p-4">
