@@ -152,6 +152,7 @@ const CreateGroup: React.FC = () => {
             userId: participant.userId,
             name: participant.name,
             profilePic: participant.profilePic,
+            status: participant.status,
           }));
 
           const transformedChat = {
