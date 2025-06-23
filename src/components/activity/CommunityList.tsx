@@ -68,7 +68,7 @@ const CommunityList = ({
                 </p>
               </div>
               <div className="text-xs text-foreground/80 font-medium">
-                {communityWithDetails?.members?.length || community.participants.length || 0} Members
+                {communityWithDetails?.memberCount || community.participants.length || 0} Members
               </div>
             </div>
           </div>
