@@ -649,7 +649,8 @@ const CreateStory = () => {
             <label className="cursor-pointer">
               <input
                 type="file"
-                accept="image/*"
+                // accept="image/*"
+                accept=".png,.jpg,.jpeg,.gif,.webp,.svg"
                 className="hidden"
                 onChange={(e) => handleMediaUpload(e, "photo")}
               />
