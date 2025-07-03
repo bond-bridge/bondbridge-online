@@ -1030,7 +1030,8 @@ const CreatePost = ({
               <label className="cursor-pointer hover:opacity-75 transition-opacity relative">
                 <input
                   type="file"
-                  accept="image/*"
+                  // accept="image/*"
+                  accept=".png,.jpg,.jpeg,.gif,.webp,.svg"
                   multiple
                   className="hidden"
                   onChange={handleMediaUpload}
