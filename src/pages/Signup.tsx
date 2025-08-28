@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AuthLayout from "../components/auth/AuthLayout";
 import OTPForm from "../components/auth/OTPForm";
-import { Checkbox } from "@/components/ui/checkbox";
 // import IntlTelInput from "react-intl-tel-input";
+import Captcha, { CaptchaHandle } from "@/components/auth/captcha";
+import { Button } from "@/components/ui/button";
+import { CustomPhoneInput } from "@/components/ui/custom-phone-input";
+import { ArrowLeft } from "lucide-react";
 import "react-intl-tel-input/dist/main.css";
+import { toast } from "sonner";
 import { sendOTP, verifyOTP } from "../apis/commonApiCalls/authenticationApi";
 import { useApiCall } from "../apis/globalCatchError";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import { CustomPhoneInput } from "@/components/ui/custom-phone-input";
-import { toast } from "sonner";
-
 
 const Signup: React.FC = () => {
   const [showOTP, setShowOTP] = useState(false);
@@ -20,23 +20,23 @@ const Signup: React.FC = () => {
   const [, setIsValidPhone] = useState(false);
   const [receivedOTP, setReceivedOTP] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [captchaSolved, setCaptchaSolved] = useState(false);
+  const captchaRef = useRef<CaptchaHandle | null>(null);
+  const honeypotRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   // Handle referral code from URL
   useEffect(() => {
-    const referralCode = searchParams.get('referral');
+    const referralCode = searchParams.get("referral");
     if (referralCode) {
-      sessionStorage.setItem('referralCode', referralCode);
+      sessionStorage.setItem("referralCode", referralCode);
     }
   }, [searchParams]);
 
   // Use our custom hooks for API calls
   const [executeSendOTP, isSendingOTP] = useApiCall(sendOTP);
   const [executeVerifyOTP, isVerifyingOTP] = useApiCall(verifyOTP);
-
-
-
 
   interface CountryData {
     dialCode?: string;
@@ -76,6 +76,15 @@ const Signup: React.FC = () => {
     // Clear any previous error messages
     setErrorMessage("");
 
+    if (!captchaSolved) {
+      setErrorMessage("Please complete the CAPTCHA.");
+      return;
+    }
+    if (honeypotRef.current && honeypotRef.current.value.trim().length > 0) {
+      setErrorMessage("Invalid request.");
+      return;
+    }
+
     const validCountryCode = "+" + countryCode;
 
     const result = await executeSendOTP({
@@ -85,9 +94,13 @@ const Signup: React.FC = () => {
 
     if (result.status === 409) {
       setErrorMessage("User with this Phone Number Already Exists");
+      captchaRef.current?.reset();
+      setCaptchaSolved(false);
       return;
     } else if (!result.success) {
       setErrorMessage(result.message || "Invalid Phone Number");
+      captchaRef.current?.reset();
+      setCaptchaSolved(false);
       return;
     }
 
@@ -117,8 +130,7 @@ const Signup: React.FC = () => {
       //   dispatch(updateCurrentUser(userData.data));
       // }
       navigate("/setup-profile");
-    }
-    else{
+    } else {
       toast.error("Invalid OTP");
     }
   };
@@ -200,6 +212,24 @@ const Signup: React.FC = () => {
               </div>
             </div>
 
+            <div className="w-full flex flex-col justify-start">
+              <label className="block text-sm font-medium text-foreground">
+                Verification
+              </label>
+              <Captcha
+                ref={captchaRef}
+                onSolve={setCaptchaSolved}
+                minSolveMs={1500}
+              />
+              <input
+                ref={honeypotRef}
+                name="company"
+                className="hidden"
+                tabIndex={-1}
+                autoComplete="off"
+              />
+            </div>
+
             <div className="space-y-2 flex flex-col justify-start w-full">
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -240,23 +270,33 @@ const Signup: React.FC = () => {
             <button
               type="submit"
               className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary cursor-pointer"
-              disabled={isSendingOTP}
+              disabled={isSendingOTP || !captchaSolved}
             >
-              {isSendingOTP ? "Sending OTP..." : "Sign Up"}
+              {isSendingOTP
+                ? "Sending OTP..."
+                : !captchaSolved
+                ? "Verify CAPTCHA"
+                : "Sign Up"}
             </button>
 
             <div className="flex flex-col items-center justify-center gap-1">
               <div className="flex justify-center pt-4">
                 {/* <p className="text-md text-center text-muted-foreground">Get the app:</p> */}
                 <div className="flex justify-center gap-4">
-                  <Link to="https://apps.apple.com/in/app/bondbridge-ai/id6745119162" className="">
+                  <Link
+                    to="https://apps.apple.com/in/app/bondbridge-ai/id6745119162"
+                    className=""
+                  >
                     <img
                       src="/assets/stores/appstore.svg"
                       alt="Download on App Store"
                       className="w-40"
                     />
                   </Link>
-                  <Link to="https://play.google.com/store/apps/details?id=com.bondbridge.bondbridgeonline" className="">
+                  <Link
+                    to="https://play.google.com/store/apps/details?id=com.bondbridge.bondbridgeonline"
+                    className=""
+                  >
                     <img
                       src="/assets/stores/googleplay.svg"
                       alt="Get it on Google Play"
