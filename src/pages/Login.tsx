@@ -5,23 +5,19 @@ import AuthLayout from "../components/auth/AuthLayout";
 // import IntlTelInput from "react-intl-tel-input";
 // import "react-intl-tel-input/dist/main.css";
 import Captcha, { CaptchaHandle } from "@/components/auth/captcha";
-import { CustomPhoneInput } from "@/components/ui/custom-phone-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { LoginResponse } from "../apis/apiTypes/response";
-import { loginUser } from "../apis/commonApiCalls/authenticationApi";
+import { loginUserWithEmail } from "../apis/commonApiCalls/authenticationApi";
 import { useApiCall } from "../apis/globalCatchError";
 import { updateCurrentUser } from "../store/currentUserSlice";
 
 const Login: React.FC = () => {
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [countryCode, setCountryCode] = useState("1"); // Default to USA (dial code "1")
-  const [, setIsValidPhone] = useState(false);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
-  // const phoneInputRef = useRef(null); // No longer needed for CustomPhoneInput unless specific direct manipulation is required
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [passwordType, setPasswordType] = useState("password");
@@ -30,7 +26,7 @@ const Login: React.FC = () => {
   const honeypotRef = useRef<HTMLInputElement | null>(null);
 
   // Use our custom hook for API calls
-  const [executeLogin, isLoggingIn] = useApiCall(loginUser);
+  const [executeLogin, isLoggingIn] = useApiCall(loginUserWithEmail);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,17 +41,14 @@ const Login: React.FC = () => {
       return;
     }
 
-    const validCountryCode = "+" + countryCode;
-
     const result = await executeLogin({
-      phoneNumber,
-      countryCode: validCountryCode,
+      email,
       password,
     });
 
     if (!result.success) {
       setAuthError(
-        "Invalid Credentials. Please check your Phone Number and Password."
+        "Invalid Credentials. Please check your Email and Password."
       );
       captchaRef.current?.reset();
       setCaptchaSolved(false);
@@ -72,6 +65,7 @@ const Login: React.FC = () => {
         username: data.userDetails.name || "",
         email: data.userDetails.email || "",
         avatar: data.userDetails.avatar || data.userDetails.profilePic || "",
+        statusCode: data.userDetails.statusCode,
       })
     );
 
@@ -80,31 +74,6 @@ const Login: React.FC = () => {
     }
   };
 
-  const handlePhoneChange = (
-    isValid: boolean,
-    value: string,
-    selectedCountryData: { dialCode?: string }
-  ) => {
-    setIsValidPhone(isValid);
-    if (selectedCountryData && selectedCountryData.dialCode) {
-      setCountryCode(selectedCountryData.dialCode);
-    }
-
-    // Remove the country code from the phone number
-    if (selectedCountryData && selectedCountryData.dialCode) {
-      const dialCode = String(selectedCountryData.dialCode);
-      let cleanNumber = value.replace(/\D/g, "");
-
-      // If number starts with the dial code, remove it
-      if (cleanNumber.startsWith(dialCode)) {
-        cleanNumber = cleanNumber.substring(dialCode.length);
-      }
-
-      setPhoneNumber(cleanNumber);
-    } else {
-      setPhoneNumber(value.replace(/\D/g, ""));
-    }
-  };
 
   return (
     <>
@@ -124,31 +93,20 @@ const Login: React.FC = () => {
         >
           <div className="flex flex-col justify-start w-full">
             <Label
-              htmlFor="phoneNumber"
+              htmlFor="email"
               className="block text-sm font-medium text-foreground mb-1"
             >
-              Phone
+              Email
             </Label>
             <div className="relative">
-              {/* <IntlTelInput
-                ref={phoneInputRef}
-                containerClassName="intl-tel-input"
-                inputClassName="form-control w-full h-10 px-3 py-2 border border-input rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-ring"
-                defaultCountry={"us"}
-                preferredCountries={["us"]}
-                onPhoneNumberChange={handlePhoneChange}
-                onPhoneNumberBlur={handlePhoneChange}
-                format={true}
-                formatOnInit={true}
-                autoPlaceholder={true}
-                nationalMode={false}
-                separateDialCode={true}
-              /> */}
-              <CustomPhoneInput
-                value={phoneNumber}
-                onChange={handlePhoneChange}
-                defaultCountryCode={countryCode} // Pass the dial code, e.g., "1"
-                placeholder="Enter phone number"
+              <Input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1 block w-full h-10 px-3 py-2 border border-input rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-ring"
+                placeholder="Enter your email"
+                required
               />
             </div>
           </div>
