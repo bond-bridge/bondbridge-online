@@ -72,7 +72,8 @@ const SetupProfile: React.FC = () => {
   // Get profile data from Redux store
   const {
     name,
-    email,
+    phoneNumber,
+    countryCode,
     dateOfBirth,
     password,
     skillSelected,
@@ -90,7 +91,7 @@ const SetupProfile: React.FC = () => {
   // Handle form submission
   const handleSubmit = async () => {
     // Validate personal information
-    if (!name || !email || !dateOfBirth || !password) {
+    if (!name || !phoneNumber || !dateOfBirth || !password) {
       toast.error("Personal information has not been filled correctly.");
       navigate("#personal"); // Navigate to the personal info tab
       return;
@@ -102,7 +103,8 @@ const SetupProfile: React.FC = () => {
     // First submit the profile
     const result = await executeSubmit({
       name,
-      email,
+      phoneNumber,
+      countryCode: countryCode,
       dateOfBirth,
       password,
       skillSelected,
@@ -139,6 +141,8 @@ const SetupProfile: React.FC = () => {
           username: result.data.userDetails.name,
           nickname: result.data.userDetails.nickName,
           email: result.data.userDetails.email,
+          mobileNumber: result.data.userDetails.mobileNumber,
+          countryCode: result.data.userDetails.countryCode,
           avatar: result.data.userDetails.avatar,
           profilePic: result.data.userDetails.profilePic,
           bio: result.data.userDetails.bio,

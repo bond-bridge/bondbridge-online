@@ -4,6 +4,8 @@ interface CurrentUserState {
   username: string;
   nickname: string;
   email: string;
+  mobileNumber: string;
+  countryCode: string;
   avatar: string;
   profilePic?: string;
   bio?: string;
@@ -18,12 +20,15 @@ interface CurrentUserState {
   following: number;
   isBlocked: boolean;
   avatarSrc: string;
+  statusCode: number;
 }
 
 const initialState: CurrentUserState = {
   username: "",
   nickname: "",
   email: "",
+  mobileNumber: "",
+  countryCode: "",
   avatar: "",
   profilePic: "",
   bio: "",
@@ -38,6 +43,7 @@ const initialState: CurrentUserState = {
   following: 0,
   isBlocked: false,
   avatarSrc: "",
+  statusCode: 0,
 };
 
 const currentUserSlice = createSlice({

@@ -1,6 +1,8 @@
 export interface UserProfileData {
   username: string;
   email: string;
+  mobileNumber?: string;
+  countryCode?: string;
   bio?: string;
   nickName?: string;
   followers: number;
@@ -20,6 +22,7 @@ export interface UserProfileData {
   referralCode?: string;
   referralCount?: number;
   userId?: string;
+  statusCode?: number;
 }
 
 export interface PostData {

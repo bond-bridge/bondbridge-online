@@ -6,18 +6,17 @@ import OTPForm from "../components/auth/OTPForm";
 // import IntlTelInput from "react-intl-tel-input";
 import Captcha, { CaptchaHandle } from "@/components/auth/captcha";
 import { Button } from "@/components/ui/button";
-import { CustomPhoneInput } from "@/components/ui/custom-phone-input";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ArrowLeft } from "lucide-react";
 import "react-intl-tel-input/dist/main.css";
 import { toast } from "sonner";
-import { sendOTP, verifyOTP } from "../apis/commonApiCalls/authenticationApi";
+import { sendOTPEmail, verifyOTPEmail } from "../apis/commonApiCalls/authenticationApi";
 import { useApiCall } from "../apis/globalCatchError";
 
 const Signup: React.FC = () => {
   const [showOTP, setShowOTP] = useState(false);
-  const [phone, setPhone] = useState("");
-  const [countryCode, setCountryCode] = useState("1"); // Default to USA (+1)
-  const [, setIsValidPhone] = useState(false);
+  const [email, setEmail] = useState("");
   const [receivedOTP, setReceivedOTP] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [captchaSolved, setCaptchaSolved] = useState(false);
@@ -35,41 +34,9 @@ const Signup: React.FC = () => {
   }, [searchParams]);
 
   // Use our custom hooks for API calls
-  const [executeSendOTP, isSendingOTP] = useApiCall(sendOTP);
-  const [executeVerifyOTP, isVerifyingOTP] = useApiCall(verifyOTP);
+  const [executeSendOTP, isSendingOTP] = useApiCall(sendOTPEmail);
+  const [executeVerifyOTP, isVerifyingOTP] = useApiCall(verifyOTPEmail);
 
-  interface CountryData {
-    dialCode?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-  }
-
-  const handlePhoneChange = (
-    isValid: boolean,
-    value: string,
-    selectedCountryData: CountryData
-  ) => {
-    setIsValidPhone(isValid);
-    if (selectedCountryData && selectedCountryData.dialCode) {
-      setCountryCode(selectedCountryData.dialCode);
-    }
-
-    // Remove the country code from the phone number
-    if (selectedCountryData && selectedCountryData.dialCode) {
-      const dialCode = selectedCountryData.dialCode;
-      let cleanNumber = value.replace(/\D/g, "");
-
-      // If number starts with the dial code, remove it
-      const dialCodeString = String(dialCode);
-      if (cleanNumber.startsWith(dialCodeString)) {
-        cleanNumber = cleanNumber.substring(dialCodeString.length);
-      }
-
-      setPhone(cleanNumber);
-    } else {
-      setPhone(value.replace(/\D/g, ""));
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,20 +52,17 @@ const Signup: React.FC = () => {
       return;
     }
 
-    const validCountryCode = "+" + countryCode;
-
     const result = await executeSendOTP({
-      phoneNumber: phone,
-      countryCode: validCountryCode,
+      email,
     });
 
     if (result.status === 409) {
-      setErrorMessage("User with this Phone Number Already Exists");
+      setErrorMessage("User with this Email Already Exists");
       captchaRef.current?.reset();
       setCaptchaSolved(false);
       return;
     } else if (!result.success) {
-      setErrorMessage(result.message || "Invalid Phone Number");
+      setErrorMessage(result.message || "Invalid Email");
       captchaRef.current?.reset();
       setCaptchaSolved(false);
       return;
@@ -106,21 +70,18 @@ const Signup: React.FC = () => {
 
     if (result.success && result.data) {
       // For testing purposes - extract OTP from response
-      // In a production environment, this would come via SMS
+      // In a production environment, this would come via email
       // @ts-expect-error - accessing OTP for testing purposes
-      const otpValue = result.data.otp || "Check your phone for OTP";
+      const otpValue = result.data.otp || "Check your email for OTP";
       setReceivedOTP(otpValue.toString());
       setShowOTP(true);
     }
   };
 
   const handleVerifyOTP = async (otp: string) => {
-    const validCountryCode = "+" + countryCode;
-
     const result = await executeVerifyOTP({
-      phoneNumber: phone,
+      email,
       otp,
-      countryCode: validCountryCode,
     });
 
     if (result.success && result.data) {
@@ -173,36 +134,21 @@ const Signup: React.FC = () => {
             className="space-y-4 w-full flex flex-col items-center relative"
           >
             <div className="w-full flex flex-col justify-start">
-              <label
-                htmlFor="phone"
+              <Label
+                htmlFor="email"
                 className="block text-sm font-medium text-foreground"
               >
-                Phone
-              </label>
+                Email
+              </Label>
               <div className="relative">
-                {/* <IntlTelInput
-                  ref={phoneInputRef}
-                  containerClassName="intl-tel-input"
-                  inputClassName="form-control w-full h-10 px-3 py-2 border border-input rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                  defaultCountry={"us"}
-                  preferredCountries={["us"]}
-                  onPhoneNumberChange={handlePhoneChange}
-                  onPhoneNumberBlur={handlePhoneChange}
-                  format={true}
-                  formatOnInit={true}
-                  autoPlaceholder={true}
-                  nationalMode={false}
-                  separateDialCode={true}
-                  telInputProps={{
-                    className: "w-full",
-                    placeholder: "Enter phone number",
-                  }}
-                /> */}
-                <CustomPhoneInput
-                  value={phone}
-                  onChange={handlePhoneChange}
-                  defaultCountryCode={countryCode}
-                  placeholder="Enter phone number"
+                <Input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="mt-1 block w-full h-10 px-3 py-2 border border-input rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-ring"
+                  placeholder="Enter your email"
+                  required
                 />
                 {errorMessage && (
                   <p className="text-foreground text-sm mt-1 font-semibold">
@@ -311,7 +257,7 @@ const Signup: React.FC = () => {
           <div className="space-y-4">
             <div className="mb-4">
               <p className="text-sm text-muted-foreground">
-                We've sent a verification code to your phone
+                We've sent a verification code to your email
               </p>
             </div>
             <OTPForm
