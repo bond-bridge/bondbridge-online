@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../components/auth/AuthLayout";
 // import IntlTelInput from "react-intl-tel-input";
 // import "react-intl-tel-input/dist/main.css";
-import Captcha, { CaptchaHandle } from "@/components/auth/captcha";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
@@ -13,7 +12,13 @@ import { LoginResponse } from "../apis/apiTypes/response";
 import { loginUserWithEmail } from "../apis/commonApiCalls/authenticationApi";
 import { useApiCall } from "../apis/globalCatchError";
 import { updateCurrentUser } from "../store/currentUserSlice";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -22,9 +27,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [passwordType, setPasswordType] = useState("password");
-  const [captchaSolved, setCaptchaSolved] = useState(false);
   const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
-  const captchaRef = useRef<CaptchaHandle | null>(null);
   const honeypotRef = useRef<HTMLInputElement | null>(null);
 
   // Use our custom hook for API calls
@@ -34,10 +37,6 @@ const Login: React.FC = () => {
     e.preventDefault();
     setAuthError(null);
 
-    if (!captchaSolved) {
-      setAuthError("Please complete the CAPTCHA.");
-      return;
-    }
     if (honeypotRef.current && honeypotRef.current.value.trim().length > 0) {
       setAuthError("Invalid request.");
       return;
@@ -52,8 +51,6 @@ const Login: React.FC = () => {
       setAuthError(
         "Invalid Credentials. Please check your Email and Password."
       );
-      captchaRef.current?.reset();
-      setCaptchaSolved(false);
       return;
     }
 
@@ -78,7 +75,6 @@ const Login: React.FC = () => {
     }
   };
 
-
   return (
     <>
       <AuthLayout
@@ -89,17 +85,14 @@ const Login: React.FC = () => {
         }
         subtitle="Log in to unlock a world of endless possibilities"
         image="/auth/login.png"
-        isLogin
-      >
+        isLogin>
         <form
           onSubmit={handleSubmit}
-          className="relative space-y-4 flex flex-col items-center"
-        >
+          className="relative space-y-4 flex flex-col items-center">
           <div className="flex flex-col justify-start w-full">
             <Label
               htmlFor="email"
-              className="block text-sm font-medium text-foreground mb-1"
-            >
+              className="block text-sm font-medium text-foreground mb-1">
               Email
             </Label>
             <div className="relative">
@@ -117,8 +110,7 @@ const Login: React.FC = () => {
           <div className="flex flex-col justify-start w-full">
             <Label
               htmlFor="password"
-              className="block text-sm font-medium text-foreground mb-1"
-            >
+              className="block text-sm font-medium text-foreground mb-1">
               Password
             </Label>
             <div className="relative">
@@ -141,8 +133,7 @@ const Login: React.FC = () => {
                   setPasswordType(
                     passwordType === "password" ? "text" : "password"
                   );
-                }}
-              >
+                }}>
                 {passwordType === "password" ? <Eye /> : <EyeOff />}
               </Button>
             </div>
@@ -153,31 +144,22 @@ const Login: React.FC = () => {
             )}
           </div>
 
-          <div className="flex flex-col justify-start w-full">
-            <Label className="block text-sm font-medium text-foreground mb-1">
-              Verification
-            </Label>
-            <Captcha
-              ref={captchaRef}
-              onSolve={setCaptchaSolved}
-              minSolveMs={1500}
-            />
-            <input
-              ref={honeypotRef}
-              name="company"
-              className="hidden"
-              tabIndex={-1}
-              autoComplete="off"
-            />
-          </div>
+          <input
+            ref={honeypotRef}
+            name="company"
+            className="hidden"
+            tabIndex={-1}
+            autoComplete="off"
+          />
 
           <div className="flex justify-between w-full">
-            <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
+            <Dialog
+              open={isContactDialogOpen}
+              onOpenChange={setIsContactDialogOpen}>
               <DialogTrigger asChild>
                 <button
                   type="button"
-                  className="text-sm text-foreground hover:text-muted-foreground cursor-pointer"
-                >
+                  className="text-sm text-foreground hover:text-muted-foreground cursor-pointer">
                   Forgot Email?
                 </button>
               </DialogTrigger>
@@ -186,14 +168,17 @@ const Login: React.FC = () => {
                   <DialogTitle>Contact Us</DialogTitle>
                 </DialogHeader>
                 <div className="text-sm text-foreground">
-                  Contact us at <span className="font-bold text-foreground">info@bondbridge.ai</span> for email related queries
+                  Contact us at{" "}
+                  <span className="font-bold text-foreground">
+                    info@bondbridge.ai
+                  </span>{" "}
+                  for email related queries
                 </div>
               </DialogContent>
             </Dialog>
             <Link
               to="/forgot-password"
-              className="text-sm text-foreground hover:text-muted-foreground"
-            >
+              className="text-sm text-foreground hover:text-muted-foreground">
               Forgot Password?
             </Link>
           </div>
@@ -201,13 +186,8 @@ const Login: React.FC = () => {
           <Button
             type="submit"
             className="w-full cursor-pointer"
-            disabled={isLoggingIn || !captchaSolved}
-          >
-            {isLoggingIn
-              ? "Logging In..."
-              : !captchaSolved
-              ? "Verify CAPTCHA"
-              : "Log In"}
+            disabled={isLoggingIn}>
+            {isLoggingIn ? "Logging In..." : "Log In"}
           </Button>
           <div className="flex flex-col items-center justify-center gap-1">
             <div className="flex justify-center pt-4">
@@ -215,8 +195,7 @@ const Login: React.FC = () => {
               <div className="flex justify-center gap-4">
                 <Link
                   to="https://apps.apple.com/in/app/bondbridge-ai/id6745119162"
-                  className=""
-                >
+                  className="">
                   <img
                     src="/assets/stores/appstore.svg"
                     alt="Download on App Store"
@@ -225,8 +204,7 @@ const Login: React.FC = () => {
                 </Link>
                 <Link
                   to="https://play.google.com/store/apps/details?id=com.bondbridge.bondbridgeonline"
-                  className=""
-                >
+                  className="">
                   <img
                     src="/assets/stores/googleplay.svg"
                     alt="Get it on Google Play"

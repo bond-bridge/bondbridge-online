@@ -1,5 +1,5 @@
 // At the top of the file, import the VideoFileWithThumbnail type
-import { VideoFileWithThumbnail } from '../../components/MediaCropModal';
+import { VideoFileWithThumbnail } from "../../components/MediaCropModal";
 
 // Base phone type used in multiple requests
 export interface BasePhoneRequest {
@@ -15,6 +15,7 @@ export type SendOTPRequest = BasePhoneRequest & {
 // Email OTP request type
 export interface SendOTPEmailRequest {
   email: string;
+  recaptchaToken?: string;
   forgot?: string;
 }
 
@@ -78,7 +79,7 @@ export interface CreateProfileRequest {
 
 export interface FetchAvatarsRequest {
   userId?: string;
-} 
+}
 
 export interface FetchCommentsRequest {
   feedId: string;
@@ -159,7 +160,7 @@ export interface EditGroupRequest {
 }
 
 export interface StoryData {
-  type: 'text' | 'photo' | 'video';
+  type: "text" | "photo" | "video";
   content: string | File | Blob;
   theme: {
     bgColor: string;
@@ -170,7 +171,7 @@ export interface StoryData {
 }
 
 export interface Story {
-  type: 'text' | 'photo' | 'video';
+  type: "text" | "photo" | "video";
   content: string | File | Blob;
   theme: {
     bgColor: string;
@@ -181,11 +182,11 @@ export interface Story {
 }
 
 export interface StoryRequest {
-  contentType: 'text' | 'image' | 'video';
+  contentType: "text" | "image" | "video";
   privacy: number;
   theme: string;
-  text?: string;      
-  image?: File;       
+  text?: string;
+  image?: File;
   video?: File;
   repliesEnabled?: number;
   taggedUsers?: string[];

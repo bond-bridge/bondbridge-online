@@ -25,6 +25,7 @@ import {
 
 type SendOTPEmailRequestBody = {
   email: string;
+  recaptchaToken?: string;
   forgot?: string;
 };
 
@@ -103,59 +104,73 @@ export const verifyOTP = async (
 };
 
 // Function to send OTP for email signup or forgot password
-export const sendOTPEmail = async (emailData: SendOTPEmailRequest): Promise<SendOTPResponse> => {
-  const { email, forgot } = emailData;
-  
+export const sendOTPEmail = async (
+  emailData: SendOTPEmailRequest
+): Promise<SendOTPResponse> => {
+  const { email, forgot, recaptchaToken } = emailData;
+
   // Validate required fields
   if (!email) {
-    throw new Error('Email is required');
+    throw new Error("Email is required");
   }
-  
+
   // Include forgot parameter if provided
   const requestBody: SendOTPEmailRequestBody = { email };
   if (forgot) {
     requestBody.forgot = forgot;
   }
-  
-  const response = await apiClient.post<SendOTPResponse>(`/send-email-otp`, requestBody);
+  if (recaptchaToken) {
+    requestBody.recaptchaToken = recaptchaToken;
+  }
+
+  const response = await apiClient.post<SendOTPResponse>(
+    `/send-email-otp`,
+    requestBody
+  );
 
   if (response.status === 200) {
     return response.data;
   } else {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    throw new Error((response as any).response?.data.message || 'Failed to send OTP');
+    throw new Error(
+      (response as any).response?.data.message || "Failed to send OTP"
+    );
   }
 };
 
 // Function to verify email OTP
-export const verifyOTPEmail = async (otpData: VerifyOTPEmailRequest): Promise<VerifyOTPResponse> => {
+export const verifyOTPEmail = async (
+  otpData: VerifyOTPEmailRequest
+): Promise<VerifyOTPResponse> => {
   const { email, otp, forgot } = otpData;
-  
+
   // Validate required fields
   if (!email || !otp) {
-    throw new Error('Email and OTP are required');
+    throw new Error("Email and OTP are required");
   }
-  
+
   // Include forgot parameter if provided
   const requestBody: VerifyOTPEmailRequestBody = { email, otp };
   if (forgot) {
     requestBody.forgot = forgot;
   }
-  
-  const response = await apiClient.post<VerifyOTPResponse>(`/verify-email-otp`, requestBody);
-  
+
+  const response = await apiClient.post<VerifyOTPResponse>(
+    `/verify-email-otp`,
+    requestBody
+  );
+
   if (response.status === 200) {
-    
     // Store token and userId in localStorage
     if (response.data.token && response.data.userDetails?._id) {
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('userId', response.data.userDetails._id);
-      localStorage.setItem('deviceId', response.data.deviceId);
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("userId", response.data.userDetails._id);
+      localStorage.setItem("deviceId", response.data.deviceId);
     }
-    
+
     return response.data;
   } else {
-    throw new Error(response.data.message || 'Failed to verify OTP');
+    throw new Error(response.data.message || "Failed to verify OTP");
   }
 };
 
@@ -195,31 +210,36 @@ export const loginUser = async (
 };
 
 // Function to login with email and password
-export const loginUserWithEmail = async (loginData: LoginEmailRequest): Promise<LoginResponse> => {
+export const loginUserWithEmail = async (
+  loginData: LoginEmailRequest
+): Promise<LoginResponse> => {
   const { email, password } = loginData;
-  
+
   // Validate required fields
   if (!email || !password) {
-    throw new Error('Email and password are required');
+    throw new Error("Email and password are required");
   }
-  
+
   const response = await apiClient.post<LoginResponse>(`/login-email`, {
     email,
-    password
+    password,
   });
-  
+
   if (response.status === 200) {
-    
-    if (response.data.token && response.data.userDetails?._id && response.data.userDetails.statusCode != 0) {
-      localStorage.setItem('socketToken', response.data.socketToken)
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('userId', response.data.userDetails._id);
-      localStorage.setItem('deviceId', response.data.deviceId);
+    if (
+      response.data.token &&
+      response.data.userDetails?._id &&
+      response.data.userDetails.statusCode != 0
+    ) {
+      localStorage.setItem("socketToken", response.data.socketToken);
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("userId", response.data.userDetails._id);
+      localStorage.setItem("deviceId", response.data.deviceId);
     }
-    
+
     return response.data;
   } else {
-    throw new Error(response.data.message || 'Failed to login');
+    throw new Error(response.data.message || "Failed to login");
   }
 };
 
@@ -294,20 +314,24 @@ export const resetPassword = async (resetData: {
 };
 
 // Function to reset password with email
-export const resetPasswordEmail = async (resetData: { email: string; oldPassword: string; password: string }) => {
+export const resetPasswordEmail = async (resetData: {
+  email: string;
+  oldPassword: string;
+  password: string;
+}) => {
   const { email, oldPassword, password } = resetData;
-  
+
   // Validate required fields
   if (!email || !oldPassword || !password) {
-    throw new Error('Email, current password, and new password are required');
+    throw new Error("Email, current password, and new password are required");
   }
-  
+
   const response = await apiClient.post(`/reset-password-email`, {
     email,
     oldPassword,
-    password
+    password,
   });
-  
+
   return response.data;
 };
 
@@ -348,27 +372,27 @@ export const forgotPassword = async (forgotData: {
 };
 
 // Function to execute forgot password with email
-export const forgotPasswordEmail = async (forgotData: { 
-  email: string; 
-  password: string 
+export const forgotPasswordEmail = async (forgotData: {
+  email: string;
+  password: string;
 }): Promise<{ message: string; success: boolean }> => {
   const { email, password } = forgotData;
-  
+
   // Validate required fields
   if (!email || !password) {
-    throw new Error('Email and new password are required');
+    throw new Error("Email and new password are required");
   }
-  
-  const response = await apiClient.post('/forgot-password-email', {
+
+  const response = await apiClient.post("/forgot-password-email", {
     email,
-    password
+    password,
   });
-  
+
   if (response.status === 200) {
     console.log("Password reset successfully:", response.data);
     return response.data;
   } else {
-    throw new Error(response.data.message || 'Failed to reset password');
+    throw new Error(response.data.message || "Failed to reset password");
   }
 };
 
