@@ -76,7 +76,7 @@ const CommunityMemberList = ({ memberIds, memberDetails }: CommunityMemberListPr
     };
 
     fetchMembers();
-  }, [memberIds, memberDetails, fetchProfile]);
+  }, [memberIds, memberDetails]);
 
   if (loading) {
     return (
